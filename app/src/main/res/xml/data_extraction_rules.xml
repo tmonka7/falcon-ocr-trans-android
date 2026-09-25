@@ -3,8 +3,8 @@
     <cloud-backup>
         <include domain="sharedpref" path="falcon_ocr_prefs.xml"/>
         <include domain="database" path="history.db"/>
-        <exclude domain="file" path="pages/"/>
-        <exclude domain="file" path="exports/"/>
+        <!-- <exclude domain="file" path="pages/"/>
+        <exclude domain="file" path="exports/"/> -->
     </cloud-backup>
     <device-transfer>
         <include domain="sharedpref" path="falcon_ocr_prefs.xml"/>
