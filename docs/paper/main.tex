@@ -442,7 +442,8 @@ $\lceil\log_2(0.7p/\varepsilon)\rceil$ layouts (seven for $p=24$\,px). $H$ is
 non-decreasing in $s$ except at occasional line-break discontinuities, so
 bisection always returns a \emph{feasible} size, though not necessarily the
 largest one. If $H(0.45p)>|T|_h$, the minimum size is used and the overflow is
-clipped and flagged. The canvas is rotated by $\theta$ about the centre of $T$,
+flagged; no clip is applied, so the text extends below $T$ rather than being
+cut off. The canvas is rotated by $\theta$ about the centre of $T$,
 so line breaking operates in the upright frame.
 
 % ---------------------------------------------------------------------------

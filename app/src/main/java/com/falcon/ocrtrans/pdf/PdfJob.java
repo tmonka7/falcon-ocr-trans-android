@@ -29,7 +29,7 @@ import java.util.List;
  * Translates a whole PDF, one page at a time, and writes the chosen output.
  *
  * <p>Pages are processed and released individually rather than rasterised up
- * front: a 200 dpi A4 page is roughly 23 MB as ARGB_8888, so holding a
+ * front: a 200 dpi A4 page is roughly 15.5 MB as ARGB_8888, so holding a
  * twelve-page document in memory at once would exceed the heap on most devices.
  * The PDF output path keeps rendered pages only long enough to write each one
  * into the document.

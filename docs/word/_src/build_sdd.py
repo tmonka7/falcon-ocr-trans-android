@@ -34,7 +34,7 @@ def build() -> Path:
         ("Fit in a phone's memory", "One engine thread; one MT pair resident; PDF pages streamed; images capped at 2400 px."),
         ("Preserve the page's look", "Geometry-, angle- and colour-aware re-rendering with a translucent highlight and halo."),
         ("Honest failure", "Model validation at start; precise messages instead of stack traces."),
-        ("Usable one-handed", "Screen-relative large controls; collapsible side menu that never squeezes the tiles."),
+        ("Compact, consistent UI", "Screen-relative compact controls from dimension tokens; collapsible side menu that never reflows the content."),
     ], widths_cm=[4.5, 11.8], caption="Design goals")
 
     # 2 -------------------------------------------------------------------
@@ -135,7 +135,7 @@ def build() -> Path:
         ("Highlight area", "Union of source quads (grown 6 %) and the layout rectangle rotated to the block angle; unioned before filling so overlaps do not darken", "-"),
         ("Highlight fill", "Sampled paper colour, translucent, rounded corners, feathered edge", "alpha 150/255; radius 0.18 h; blur 0.06 h"),
         ("Effect on the page", "Original text and paper texture keep (1 - alpha) of their contrast (about 41 %)", "-"),
-        ("Size fitting", "Largest size in [0.45 p, 1.15 p] whose layout fits; bisection to 0.25 px; clip and flag overflow", "p = 0.82 × line height"),
+        ("Size fitting", "Largest size in [0.45 p, 1.15 p] whose layout fits; bisection to 0.25 px; overflow at the minimum size is flagged, not clipped", "p = 0.82 × line height"),
         ("Rotation", "Canvas rotated about the target centre; median line angle; < 0.75° treated as upright", "-"),
         ("Halo", "Same layout stroked in paper colour, then filled in ink colour", "width 0.16 × text size"),
         ("Options", "highlightAlpha, halo, perLine, debugBoxes", "150, true, false, false"),
@@ -169,19 +169,20 @@ def build() -> Path:
     d.h(2, "4.2 Screen-relative sizing")
     d.p("All control sizes come from dimension tokens. values/dimens.xml holds phone values and "
         "values-sw600dp/dimens.xml tablet values, so every control grows with the screen class. "
-        "On Home the column is match_parent inside a ScrollView with fillViewport, and the two tile "
-        "rows have weight 1, so the tiles share whatever height is left; on short screens their "
-        "minimum height wins and the column scrolls.")
+        "Sizes are compact (halved from the first draft at the user's request). Material buttons have "
+        "their default 6 dp insets and 48 dp minimum removed so the 30 dp height applies. Home tiles "
+        "wrap to their content; the column scrolls on short screens. Several touch targets are below "
+        "the 48 dp accessibility guideline (KI-07).")
     d.table(["Token", "Phone", "Tablet (sw600dp)", "Used by"], [
-        ("button_height / button_text", "60 dp / 18 sp", "72 dp / 22 sp", "Primary, tonal, outlined buttons"),
-        ("icon_button", "56 dp", "64 dp", "Toolbar and camera buttons, menu toggle"),
-        ("icon_button_small", "48 dp", "56 dp", "Copy, clear, swap"),
-        ("shutter_size", "88 dp", "108 dp", "Camera shutter"),
-        ("row_min_height", "64 dp", "76 dp", "Settings and option rows"),
-        ("tile_min_height / tile_icon / tile_title", "140 dp / 44 dp / 20 sp", "200 dp / 64 dp / 28 sp", "Home tiles"),
-        ("toolbar_height", "64 dp", "72 dp", "Toolbars"),
-        ("nav_rail_width / nav_rail_expanded_width", "80 / 208 dp", "104 / 280 dp", "Side menu"),
-        ("nav_item_height / nav_icon / nav_label", "64 dp / 30 dp / 16 sp", "80 dp / 38 dp / 20 sp", "Side-menu items"),
+        ("button_height / button_text", "30 dp / 12 sp", "36 dp / 14 sp", "Primary, tonal, outlined buttons"),
+        ("icon_button", "28 dp", "32 dp", "Toolbar and camera buttons, menu toggle"),
+        ("icon_button_small", "24 dp", "28 dp", "Copy, clear, swap"),
+        ("shutter_size", "44 dp", "54 dp", "Camera shutter"),
+        ("row_min_height", "32 dp", "38 dp", "Settings and option rows"),
+        ("tile_min_height / tile_icon / tile_title", "70 dp / 22 dp / 14 sp", "100 dp / 32 dp / 16 sp", "Home tiles"),
+        ("toolbar_height", "56 dp", "64 dp", "Toolbars"),
+        ("nav_rail_width / nav_rail_expanded_width", "40 / 104 dp", "52 / 140 dp", "Side menu"),
+        ("nav_item_height / nav_icon / nav_label", "32 dp / 15 dp / 12 sp", "40 dp / 19 dp / 14 sp", "Side-menu items"),
     ], widths_cm=[5.6, 3.3, 3.3, 4.1], caption="Dimension tokens", font_size=8.5)
     d.h(2, "4.3 Collapsible side menu")
     d.figure(FIG / "nav_state.png", "Side-menu state machine", 15)
@@ -194,7 +195,7 @@ def build() -> Path:
         "over the last 40 % of the animation.",
         "Collapse: toggle, tap on the scrim, or Back (an OnBackPressedCallback enabled only while expanded).",
         "Accessibility: every item carries its label as content description; collapsed items also carry a tooltip.",
-        "Why overlay: expanding by pushing would leave about 50 dp for each tile on a 360 dp phone, contradicting FR-22.",
+        "Why overlay: opening the menu never reflows or narrows the home content, and it can be dismissed by tapping anywhere outside it.",
     ])
 
     # 5 -------------------------------------------------------------------
@@ -247,8 +248,8 @@ def build() -> Path:
         ("D4", "Cacheless greedy decoder", "KV-cached decoder; beam search", "Simpler wiring; inputs are short; revisit for long documents"),
         ("D5", "Translucent highlight + halo", "Opaque erase; inpainting model", "Keeps page texture; no extra model; legibility from halo"),
         ("D6", "Korean hidden via USER_FACING", "Delete Korean code; build flavour", "Keeps the implementation; one-line re-enable; tests stay valid"),
-        ("D7", "Overlay side menu, always starts collapsed", "Push layout; persist state", "Tiles keep their size on phones; Home is never covered at launch"),
-        ("D8", "Dimension tokens + sw600dp", "Runtime computation of sizes", "Declarative, previewable, standard Android practice"),
+        ("D7", "Overlay side menu, always starts collapsed", "Push layout; persist state", "Content never reflows; Home is never covered at launch"),
+        ("D8", "Compact dimension tokens + sw600dp", "Runtime computation; 48 dp minimum targets", "Declarative and previewable; compact look requested; accessibility trade-off recorded (KI-07)"),
     ], widths_cm=[1, 4.4, 4.6, 6.3], caption="Design decisions", font_size=8.5)
 
     # 9 -------------------------------------------------------------------

@@ -3,25 +3,26 @@
 <resources>
     <dimen name="gutter">24dp</dimen>
     <dimen name="gutter_small">16dp</dimen>
-    <dimen name="toolbar_height">72dp</dimen>
+    <dimen name="toolbar_height">64dp</dimen>
 
-    <dimen name="button_height">72dp</dimen>
-    <dimen name="button_text">22sp</dimen>
-    <dimen name="icon_button">64dp</dimen>
-    <dimen name="icon_button_small">56dp</dimen>
-    <dimen name="shutter_size">108dp</dimen>
-    <dimen name="row_min_height">76dp</dimen>
+    <dimen name="button_height">36dp</dimen>
+    <dimen name="button_text">14sp</dimen>
+    <dimen name="icon_button">32dp</dimen>
+    <dimen name="icon_button_small">28dp</dimen>
+    <dimen name="shutter_size">54dp</dimen>
+    <dimen name="row_min_height">38dp</dimen>
 
-    <dimen name="tile_min_height">200dp</dimen>
-    <dimen name="tile_icon">64dp</dimen>
-    <dimen name="tile_title">28sp</dimen>
-    <dimen name="tile_subtitle">17sp</dimen>
+    <dimen name="tile_min_height">100dp</dimen>
+    <dimen name="tile_padding">12dp</dimen>
+    <dimen name="tile_icon">32dp</dimen>
+    <dimen name="tile_title">16sp</dimen>
+    <dimen name="tile_subtitle">12sp</dimen>
     <dimen name="banner_height">150dp</dimen>
 
-    <dimen name="nav_rail_width">104dp</dimen>
-    <dimen name="nav_rail_expanded_width">280dp</dimen>
-    <dimen name="nav_item_height">80dp</dimen>
-    <dimen name="nav_icon">38dp</dimen>
-    <dimen name="nav_label">20sp</dimen>
-    <dimen name="nav_item_padding_start">25dp</dimen>
+    <dimen name="nav_rail_width">52dp</dimen>
+    <dimen name="nav_rail_expanded_width">140dp</dimen>
+    <dimen name="nav_item_height">40dp</dimen>
+    <dimen name="nav_icon">19dp</dimen>
+    <dimen name="nav_label">14sp</dimen>
+    <dimen name="nav_item_padding_start">12dp</dimen>
 </resources>

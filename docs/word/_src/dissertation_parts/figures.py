@@ -806,6 +806,8 @@ def fig_ui_flow(path: Path):
 def fig_nav_menu(path: Path):
     fig, axs = plt.subplots(1, 2, figsize=(8.8, 5.0))
     W, H = 360, 640   # dp, a typical phone portrait viewport
+    TB = 56           # toolbar_height
+    RAIL, RAIL_X = 40, 104
     for ax, expanded in ((axs[0], False), (axs[1], True)):
         ax.set_xlim(0, W)
         ax.set_ylim(0, H)
@@ -813,43 +815,47 @@ def fig_nav_menu(path: Path):
         ax.set_aspect("equal")
         ax.axis("off")
         ax.add_patch(Rectangle((0, 0), W, H, fc="#F4F5F8", ec=INK, lw=1.2))
-        ax.add_patch(Rectangle((0, 0), W, 64, fc="white", ec="#D5D9E0"))
-        ax.text(14, 32, "falcon", va="center", fontsize=8, fontweight="bold")
-        ax.add_patch(Rectangle((W - 56 - 56 - 4, 4), 56, 56, fc="#EEF0F4", ec="#D5D9E0"))
-        ax.text(W - 60 - 56 + 28, 32, "i", ha="center", va="center", fontsize=9)
-        ax.add_patch(Rectangle((W - 60, 4), 56, 56, fc=FILL_B, ec=ACCENT))
-        ax.text(W - 32, 32, "≡" if not expanded else "⇤", ha="center", va="center", fontsize=12, color=ACCENT)
-        # content always offset by collapsed rail width (80dp)
-        cx0 = 80 + 16
-        ax.add_patch(Rectangle((cx0, 80), W - cx0 - 16, 110, fc=FILL_A, ec="#D5D9E0"))
-        ax.text(cx0 + 8, 180, "banner (110dp)", fontsize=6.5, color=MUTED)
-        tw = (W - cx0 - 16 - 12) / 2
+        ax.add_patch(Rectangle((0, 0), W, TB, fc="white", ec="#D5D9E0"))
+        ax.text(12, TB / 2, "falcon", va="center", fontsize=8, fontweight="bold")
+        ax.add_patch(Rectangle((W - 4 - 28 - 28, TB / 2 - 14), 28, 28, fc="#EEF0F4", ec="#D5D9E0"))
+        ax.text(W - 4 - 28 - 14, TB / 2, "i", ha="center", va="center", fontsize=8)
+        ax.add_patch(Rectangle((W - 4 - 28, TB / 2 - 14), 28, 28, fc=FILL_B, ec=ACCENT))
+        ax.text(W - 4 - 14, TB / 2, "≡" if not expanded else "⇤", ha="center", va="center", fontsize=10,
+                color=ACCENT)
+        cx0 = RAIL + 16
+        cw = W - cx0 - 16
+        ax.add_patch(Rectangle((cx0, TB + 16), cw, 110, fc=FILL_A, ec="#D5D9E0"))
+        ax.text(cx0 + 8, TB + 16 + 100, "banner (110dp)", fontsize=6.5, color=MUTED)
+        tw = (cw - 12) / 2
+        y0 = TB + 16 + 110 + 16
         for r in range(2):
-            for c in range(2):
-                x = cx0 + c * (tw + 12)
-                y = 206 + r * (174 + 12)
-                colr = [FILL_B, FILL_E, FILL_C, FILL_D][r * 2 + c]
-                ax.add_patch(Rectangle((x, y), tw, 174, fc=colr, ec="#D5D9E0"))
-                ax.text(x + tw / 2, y + 87, "tile\n≥140dp", ha="center", va="center", fontsize=6.5, color=MUTED)
-        ax.text(cx0, 596, "tile rows share remaining height (weight 1 each)", fontsize=6, color=MUTED)
+            for c_ in range(2):
+                x = cx0 + c_ * (tw + 12)
+                y = y0 + r * (70 + 12)
+                colr = [FILL_B, FILL_E, FILL_C, FILL_D][r * 2 + c_]
+                ax.add_patch(Rectangle((x, y), tw, 70, fc=colr, ec="#D5D9E0"))
+                ax.text(x + tw / 2, y + 35, "tile ≥70dp", ha="center", va="center", fontsize=6.3, color=MUTED)
+        yl = y0 + 2 * 82 + 4
+        ax.add_patch(Rectangle((cx0, yl), cw, 44, fc="white", ec="#D5D9E0"))
+        ax.text(cx0 + cw / 2, yl + 22, "language bar", ha="center", va="center", fontsize=6.5, color=MUTED)
+        ax.text(cx0, yl + 70, "tiles wrap to compact height",
+                fontsize=6.2, color=MUTED, va="top")
+        rail_w = RAIL_X if expanded else RAIL
         if expanded:
-            ax.add_patch(Rectangle((0, 64), W, H - 64, fc="black", alpha=0.70 * 0.55, ec="none"))
-            rail_w = 208
-        else:
-            rail_w = 80
-        ax.add_patch(Rectangle((0, 64), rail_w, H - 64, fc="white", ec="#C9CED8", lw=1.0))
+            ax.add_patch(Rectangle((0, TB), W, H - TB, fc="black", alpha=0.70 * 0.55, ec="none", zorder=4))
+        ax.add_patch(Rectangle((0, TB), rail_w, H - TB, fc="white", ec="#C9CED8", lw=1.0, zorder=5))
         names = ["Home", "Image", "PDF", "History", "Settings"]
         for i, nm in enumerate(names):
-            y = 72 + i * 64
-            ax.add_patch(Rectangle((8, y + 2), rail_w - 16, 60, fc=FILL_B if i == 0 else "white", ec="none"))
-            ax.add_patch(plt.Circle((8 + 17 + 15, y + 32), 15, fc="#D5D9E0", ec="none"))
+            y = TB + 8 + i * 32
+            ax.add_patch(Rectangle((4, y + 1), rail_w - 8, 30, fc=FILL_B if i == 0 else "white", ec="none", zorder=6))
+            ax.add_patch(plt.Circle((4 + 8 + 7.5, y + 16), 7.5, fc="#C9CED8", ec="none", zorder=7))
             if expanded:
-                ax.text(8 + 17 + 30 + 14, y + 32, nm, va="center", fontsize=7.5)
-        ax.annotate("", xy=(0, H - 20), xytext=(rail_w, H - 20), arrowprops=dict(arrowstyle="<->", color=ACCENT))
-        ax.text(rail_w / 2, H - 28, f"{rail_w}dp", ha="center", fontsize=7, color=ACCENT)
+                ax.text(4 + 8 + 15 + 8, y + 16, nm, va="center", fontsize=6.5, zorder=7)
+        ax.annotate("", xy=(0, H - 20), xytext=(rail_w, H - 20), arrowprops=dict(arrowstyle="<->", color=ACCENT), zorder=8)
+        ax.text(rail_w / 2, H - 28, f"{rail_w}dp", ha="center", fontsize=7, color=ACCENT, zorder=8)
         ax.set_title("(a) collapsed (initial state): icon rail, tooltips" if not expanded
                      else "(b) expanded over content with scrim;\nscrim tap, toggle or Back collapses", fontsize=8.5)
-    fig.suptitle("Schematic of the home screen at 360×640 dp (phone tokens; tablet: 104/280 dp)",
+    fig.suptitle("Schematic of the home screen at 360×640 dp (phone tokens; tablet rail 52/140 dp)",
                  fontsize=8.5, color=MUTED)
     fig.tight_layout()
     _save(fig, path)
@@ -858,8 +864,8 @@ def fig_nav_menu(path: Path):
 def fig_touch_tokens(path: Path):
     names = ["icon_button_small", "icon_button", "button_height", "row_min_height", "nav_item_height",
              "shutter_size", "tile_min_height"]
-    phone = [48, 56, 60, 64, 64, 88, 140]
-    tablet = [56, 64, 72, 76, 80, 108, 200]
+    phone = [24, 28, 30, 32, 32, 44, 70]
+    tablet = [28, 32, 36, 38, 40, 54, 100]
     fig, ax = plt.subplots(figsize=(8.5, 3.0))
     y = np.arange(len(names))
     ax.barh(y - 0.18, phone, height=0.34, color=BLUE, label="values/ (phone)")
@@ -870,7 +876,8 @@ def fig_touch_tokens(path: Path):
     ax.set_yticklabels(names, fontsize=7.5)
     ax.set_xlabel("dp (dimension tokens from the resource files)")
     ax.legend(fontsize=7, frameon=False, loc="lower right")
-    ax.set_title("Touch-target dimension tokens (configuration values, not measurements)", fontsize=8.5)
+    ax.set_title("Compact control tokens vs. 48 dp guidance (configuration values, not measurements)",
+                 fontsize=8.5)
     _save(fig, path)
 
 

@@ -31,7 +31,8 @@ model/
         ├── encoder.int8.onnx
         ├── decoder.int8.onnx
         ├── source.spm.tsv            piece <TAB> log-probability
-        ├── vocab.tsv                 token  <TAB> id
+        ├── vocab.tsv                 token  <TAB> id  (target vocabulary)
+        ├── source_vocab.tsv          token  <TAB> id  (en-ko only: separate source vocabulary)
         └── config.json               special token ids, decode limits
 ```
 

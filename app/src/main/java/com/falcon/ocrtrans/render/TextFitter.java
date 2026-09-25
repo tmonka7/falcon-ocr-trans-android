@@ -28,7 +28,7 @@ public final class TextFitter {
     public static final class Fit {
         public final StaticLayout layout;
         public final float textSize;
-        /** True when even {@link #MIN_SCALE} overflowed and the text was clipped. */
+        /** True when even {@link #MIN_SCALE} overflowed; the text then runs past the box. */
         public final boolean overflowed;
 
         Fit(StaticLayout layout, float textSize, boolean overflowed) {
@@ -58,8 +58,9 @@ public final class TextFitter {
         float low = Math.max(4f, preferred * MIN_SCALE);
         float high = Math.max(low, preferred * MAX_SCALE);
 
-        // If even the smallest permitted size overflows, use it and clip: a
-        // slightly cropped translation beats a blank region where text was.
+        // If even the smallest permitted size overflows, use it anyway and flag
+        // it: overflowing text beats a blank region where text was. The caller
+        // sets no clip, so the overflow runs past the bottom of the box.
         paint.setTextSize(low);
         StaticLayout smallest = build(text, paint, safeWidth, alignment);
         if (smallest.getHeight() > safeHeight) {

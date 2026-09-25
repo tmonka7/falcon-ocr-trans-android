@@ -1,0 +1,13 @@
+# Install PyTorch first, matching your CUDA version (https://pytorch.org/get-started/locally/), e.g.
+#   pip install torch --index-url https://download.pytorch.org/whl/cu124
+# then:
+#   pip install -r tools/mt_train/requirements.txt
+#
+# Verified together on 2026-09-25 (CPU): torch 2.14, transformers 4.57.6, datasets 5.0.1, sacrebleu 2.6.0.
+transformers>=4.44,<5
+datasets>=2.20
+accelerate>=0.30
+sentencepiece>=0.2
+sacrebleu>=2.4
+optimum[onnxruntime]>=1.20   # export.py -> tools/convert_mt.py
+pytest>=8

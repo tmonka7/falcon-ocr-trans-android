@@ -259,8 +259,8 @@ def build(c):
         "encodes similar floors: Android recommends touch targets of at least 48 × 48 dp "
         "[@android_a11y], and WCAG 2.1 success criterion 2.5.5 (level AAA) asks for 44 × 44 CSS pixels "
         "[@wcag21]. The users of an image translation app are frequently holding a document or standing "
-        "in front of a sign, often with one hand; Chapter 7 describes how the system sizes its controls "
-        "well above these floors and scales them with the screen.")
+        "in front of a sign, often with one hand. Chapter 7 describes how the system sizes its controls, "
+        "and why several of them deliberately fall below these floors in favour of a compact interface.")
     c.h3("Navigation patterns")
     c.p("Mobile applications organise top-level destinations with a bottom navigation bar, a navigation "
         "drawer or a navigation rail. Material Design describes the rail as a vertical strip of "

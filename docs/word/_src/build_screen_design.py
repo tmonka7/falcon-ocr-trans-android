@@ -16,7 +16,7 @@ def build() -> Path:
             version=VERSION, status="Baseline draft", date=DATE)
     d.cover()
     d.revision_history([
-        ("1.0", DATE, "[Author]", "All ten screens; large screen-relative controls; collapsible side menu "
+        ("1.0", DATE, "[Author]", "All ten screens; compact screen-relative controls (halved from the first draft); collapsible side menu "
                                   "with right-hand toggle; Korean removed from language lists."),
     ])
     d.toc()
@@ -45,22 +45,22 @@ def build() -> Path:
         ("scrim", "#B3000000 (70 % black)", "Dims content behind the expanded side menu"),
     ], widths_cm=[5.2, 5.2, 5.9], caption="Colour tokens")
     d.h(2, "2.3 Size tokens")
-    d.p("Controls are deliberately large and scale with the screen (FR-22). The home tiles also stretch "
-        "to share the free height.")
+    d.p("Controls are compact and scale with the screen class (FR-22). Several touch targets are below "
+        "Android's 48 dp guideline by design (KI-07); raise the tokens in dimens.xml if accessibility takes priority.")
     d.table(["Token", "Phone", "Tablet", "Applies to"], [
-        ("button_height", "60 dp", "72 dp", "Primary (red), tonal and outlined buttons"),
-        ("button_text", "18 sp", "22 sp", "Button labels"),
-        ("icon_button", "56 dp", "64 dp", "Toolbar back/action, camera top bar, gallery/auto, menu toggle, model status"),
-        ("icon_button_small", "48 dp", "56 dp", "Copy, clear, swap (minimum touch target)"),
-        ("shutter_size", "88 dp", "108 dp", "Camera shutter"),
-        ("row_min_height", "64 dp", "76 dp", "Settings and PDF option rows"),
-        ("toolbar_height", "64 dp", "72 dp", "All toolbars"),
-        ("tile_min_height", "140 dp", "200 dp", "Home tiles (grow to fill)"),
-        ("tile_icon / tile_title / tile_subtitle", "44 dp / 20 sp / 13 sp", "64 dp / 28 sp / 17 sp", "Home tile content"),
+        ("button_height", "30 dp", "36 dp", "Primary (red), tonal and outlined buttons"),
+        ("button_text", "12 sp", "14 sp", "Button labels"),
+        ("icon_button", "28 dp", "32 dp", "Toolbar back/action, camera top bar, gallery/auto, menu toggle, model status"),
+        ("icon_button_small", "24 dp", "28 dp", "Copy, clear, swap"),
+        ("shutter_size", "44 dp", "54 dp", "Camera shutter"),
+        ("row_min_height", "32 dp", "38 dp", "Settings and PDF option rows"),
+        ("toolbar_height", "56 dp", "64 dp", "All toolbars"),
+        ("tile_min_height / tile_padding", "70 dp / 9 dp", "100 dp / 12 dp", "Home tiles (wrap to content)"),
+        ("tile_icon / tile_title / tile_subtitle", "22 dp / 14 sp / 11 sp", "32 dp / 16 sp / 12 sp", "Home tile content"),
         ("banner_height", "110 dp", "150 dp", "Home banner"),
-        ("nav_rail_width", "80 dp", "104 dp", "Side menu, collapsed"),
-        ("nav_rail_expanded_width", "208 dp", "280 dp", "Side menu, expanded"),
-        ("nav_item_height / nav_icon / nav_label", "64 dp / 30 dp / 16 sp", "80 dp / 38 dp / 20 sp", "Side-menu items"),
+        ("nav_rail_width", "40 dp", "52 dp", "Side menu, collapsed"),
+        ("nav_rail_expanded_width", "104 dp", "140 dp", "Side menu, expanded"),
+        ("nav_item_height / nav_icon / nav_label", "32 dp / 15 dp / 12 sp", "40 dp / 19 dp / 14 sp", "Side-menu items"),
         ("gutter / gutter_small", "16 / 12 dp", "24 / 16 dp", "Spacing"),
     ], widths_cm=[4.8, 3.2, 3.2, 5.1], caption="Size tokens", font_size=8.5)
     d.h(2, "2.4 Interaction rules")
@@ -96,18 +96,17 @@ def build() -> Path:
         if scr["id"] == "SCR-02":
             d.h(3, "Side-menu behaviour")
             d.steps([
-                "At launch the menu is collapsed: an 80 dp (104 dp) rail of 30 dp (38 dp) icons; Home is highlighted in red.",
-                "The **right-hand button** at the end of the title bar (callout 1) expands the menu to 208 dp (280 dp) "
+                "At launch the menu is collapsed: a 40 dp (52 dp) rail of 15 dp (19 dp) icons; Home is highlighted in red.",
+                "The **right-hand button** at the end of the title bar (callout 1) expands the menu to 104 dp (140 dp) "
                 "in 220 ms. The menu slides **over** the content, which dims behind a 70 % scrim; labels fade in near the end.",
                 "The same button (now showing the 'menu open' icon), a tap on the dimmed area, or the Back key collapses it.",
                 "Choosing an item opens its screen whether the menu is collapsed or expanded.",
                 "Collapsed icons show their label as a tooltip on long-press and are announced by TalkBack.",
             ])
-            d.h(3, "Large-button layout")
-            d.p("Banner, tile rows, language bar and the Translation button are stacked in a column that is at least "
-                "as tall as the screen. The two tile rows take equal shares of the remaining height, so on a tall "
-                "phone the tiles are much larger than their 140 dp minimum; on a short or landscape screen they "
-                "keep the minimum and the column scrolls.")
+            d.h(3, "Tile layout")
+            d.p("Banner, two rows of two tiles, language bar and the Translation button are stacked in a scrolling "
+                "column. Tiles wrap to their content (about 70 dp on a phone) and do not stretch to fill the screen; "
+                "the column scrolls if the screen is too short.")
         if scr["id"] == "SCR-05":
             d.h(3, "Rendered page appearance")
             d.p("Each translated paragraph sits on a faint, soft-edged highlight in the paper colour sampled from the "

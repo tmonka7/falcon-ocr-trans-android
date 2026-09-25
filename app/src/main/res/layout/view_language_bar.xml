@@ -9,7 +9,7 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="@drawable/bg_surface_card"
-    android:padding="10dp">
+    android:padding="8dp">
 
     <LinearLayout
         android:id="@+id/language_source"
@@ -27,7 +27,7 @@
             android:id="@+id/language_source_flag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="22sp"
+            android:textSize="18sp"
             tools:text="🇬🇧"/>
 
         <TextView
@@ -39,7 +39,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/text_primary"
-            android:textSize="17sp"
+            android:textSize="14sp"
             tools:text="English"/>
 
         <ImageView
@@ -75,7 +75,7 @@
             android:id="@+id/language_target_flag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="22sp"
+            android:textSize="18sp"
             tools:text="🇨🇳"/>
 
         <TextView
@@ -87,7 +87,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/text_primary"
-            android:textSize="17sp"
+            android:textSize="14sp"
             tools:text="Chinese"/>
 
         <ImageView

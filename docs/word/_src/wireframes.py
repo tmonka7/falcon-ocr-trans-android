@@ -70,16 +70,17 @@ class Screen:
         self.rect(cx - size / 2, cy - size / 2, size, size, outline=color, r=4, width=1)
         self.text(cx, cy, glyph, size=size * 0.5, color=color, bold=True, anchor="mm")
 
-    def button(self, x, y, w, h, label, fill=RED, color=TXT, outline=None, size=16):
-        self.rect(x, y, w, h, fill=fill, outline=outline, r=14, width=1)
+    def button(self, x, y, w, h, label, fill=RED, color=TXT, outline=None, size=12):
+        self.rect(x, y, w, h, fill=fill, outline=outline, r=8, width=1)
         self.text(x + w / 2, y + h / 2, label, size=size, color=color, bold=True, anchor="mm")
 
     def toolbar(self, title, action=None):
-        self.rect(0, 0, W, 64, fill=BG_SURFACE)
-        self.icon(32, 32, "<", 24, TXT)
-        self.text(64, 32, title, 17, TXT, True, "lm")
+        # 56 dp bar; icon buttons are 28 dp touch areas around 20 dp glyphs.
+        self.rect(0, 0, W, 56, fill=BG_SURFACE)
+        self.icon(22, 28, "<", 20, TXT)
+        self.text(44, 28, title, 17, TXT, True, "lm")
         if action:
-            self.icon(W - 32, 32, action, 24, TXT)
+            self.icon(W - 22, 28, action, 20, TXT)
 
     def status_bar(self):
         pass  # omitted: the system bar is not part of the design
@@ -89,8 +90,8 @@ class Screen:
 
     def save(self, name):
         for n, x, y in self.callouts:
-            self.circle(x, y, 10, fill=CALLOUT, outline="#FFFFFF", width=1)
-            self.text(x, y, str(n), 11, "#FFFFFF", True, "mm")
+            self.circle(x, y, 8, fill=CALLOUT, outline="#FFFFFF", width=1)
+            self.text(x, y, str(n), 9, "#FFFFFF", True, "mm")
         # thin device frame
         framed = Image.new("RGB", (W * S + 24, H * S + 24), "#C9CED8")
         framed.paste(self.img, (12, 12))
@@ -114,62 +115,64 @@ def splash():
 
 def home(expanded: bool):
     s = Screen("Home")
-    # title bar
-    s.rect(0, 0, W, 64, fill=BG_SURFACE)
-    s.rect(12, 18, 28, 28, fill=RED_DARK, r=6)
-    s.text(50, 32, "OCR Translator", 17, TXT, True, "lm")
-    s.icon(W - 84, 32, "i", 24, TXT2)
-    s.icon(W - 28, 32, "=" if not expanded else "«", 24, TXT)
-    # Content always leaves room for the collapsed rail; the expanded menu is
-    # drawn over it with a scrim, exactly as MainActivity does.
-    rail = 80
+    # title bar (56 dp); right-hand icon buttons are 28 dp
+    s.rect(0, 0, W, 56, fill=BG_SURFACE)
+    s.rect(12, 14, 28, 28, fill=RED_DARK, r=6)
+    s.text(50, 28, "OCR Translator", 17, TXT, True, "lm")
+    s.icon(W - 56, 28, "i", 20, TXT2)
+    s.icon(W - 22, 28, "=" if not expanded else "«", 20, TXT)
+    # Content always leaves room for the collapsed rail (40 dp); the expanded
+    # menu (104 dp) is drawn over it with a scrim, exactly as MainActivity does.
+    rail = 40
     labels = ["Home", "Image", "PDF", "History", "Settings"]
     glyphs = ["H", "I", "P", "Hi", "S"]
     x0 = rail + 16
     cw = W - x0 - 16
-    s.rect(x0, 80, cw, 110, fill="#3A0D14", r=14)
-    s.text(x0 + 14, 150, "Scan · Recognize · Translate", 15, TXT, True)
-    s.text(x0 + 14, 172, "Break language barriers…", 11, TXT2)
-    top, bottom = 206, 590
-    th = (bottom - top - 12) / 2
+    s.rect(x0, 72, cw, 110, fill="#3A0D14", r=14)
+    s.text(x0 + 14, 142, "Scan · Recognize · Translate", 16, TXT, True)
+    s.text(x0 + 14, 164, "Break language barriers…", 11, TXT2)
+    top, th = 198, 70
     tw = (cw - 12) / 2
-    tiles = [("Image OCR", RED, "C"), ("PDF OCR", BLUE, "P"),
-             ("Sequence", GREEN, "I"), ("History", ORANGE, "Hi")]
-    for i, (lab, col, g) in enumerate(tiles):
+    tiles = [("Image OCR", RED, "C", "Capture or select image"), ("PDF OCR", BLUE, "P", "Scan PDF files"),
+             ("Image Sequence", GREEN, "I", "Process multiple images"),
+             ("History", ORANGE, "Hi", "View translation records")]
+    for i, (lab, col, g, sub) in enumerate(tiles):
         tx = x0 + (i % 2) * (tw + 12)
         ty = top + (i // 2) * (th + 12)
-        s.rect(tx, ty, tw, th, fill=col, r=14)
-        s.icon(tx + 18 + 22, ty + th / 2 - 26, g, 44, TXT)
-        s.text(tx + 18, ty + th / 2 + 16, lab, 16, TXT, True)
-    s.rect(x0, 606, cw, 64, fill=BG_SURFACE, r=14)
-    s.text(x0 + 12, 638, "EN English", 14, TXT, anchor="lm")
-    s.text(x0 + cw / 2, 638, "<>", 15, RED, True, "mm")
-    s.text(x0 + cw - 12, 638, "Chinese ZH", 14, TXT, anchor="rm")
-    s.button(x0, 682, cw, 60, "Translation", fill=None, outline=TXT3, size=16)
+        s.rect(tx, ty, tw, th, fill=col, r=12)
+        s.icon(tx + 9 + 11, ty + 9 + 11, g, 22, TXT)
+        s.text(tx + 9, ty + 38, lab, 14, TXT, True)
+        s.text(tx + 9, ty + 56, sub, 10, TXT, anchor="la")
+    y = top + 2 * th + 12 + 16
+    s.rect(x0, y, cw, 52, fill=BG_SURFACE, r=14)
+    s.text(x0 + 12, y + 26, "EN English", 14, TXT, anchor="lm")
+    s.text(x0 + cw / 2, y + 26, "<>", 13, RED, True, "mm")
+    s.text(x0 + cw - 12, y + 26, "Chinese ZH", 14, TXT, anchor="rm")
+    by = y + 64
+    s.button(x0, by, cw, 30, "Translation", fill=None, outline=TXT3, size=12)
     if expanded:
-        # scrim over everything below the title bar
-        region = (0, 64 * S, W * S, H * S)
+        region = (0, 56 * S, W * S, H * S)
         crop = s.img.crop(region)
         dark = Image.new("RGB", crop.size, "#000000")
         s.img.paste(Image.blend(crop, dark, 0.7), region[:2])
         s.dr = ImageDraw.Draw(s.img)
-        rail = 208
-    s.rect(0, 64, rail, H - 64, fill=BG_SURFACE)
+        rail = 104
+    s.rect(0, 56, rail, H - 56, fill=BG_SURFACE)
     for i, (lab, g) in enumerate(zip(labels, glyphs)):
-        y = 72 + i * 70
+        iy = 64 + i * 35
         if i == 0:
-            s.rect(8, y, rail - 16, 64, fill=RED, r=12)
-        s.icon(8 + 17 + 15, y + 32, g, 30, TXT if i == 0 else TXT2)
+            s.rect(4, iy, rail - 8, 32, fill=RED, r=8)
+        s.icon(4 + 8 + 7.5, iy + 16, g, 15, TXT if i == 0 else TXT2)
         if expanded:
-            s.text(8 + 17 + 30 + 16, y + 32, lab, 16, TXT if i == 0 else TXT2, True, "lm")
+            s.text(4 + 8 + 15 + 8, iy + 16, lab, 12, TXT if i == 0 else TXT2, True, "lm")
     if expanded:
         s.text(rail + (W - rail) / 2, 420, "tap to collapse", 13, TXT2, anchor="mm")
-        s.callout(2, rail - 6, 110); s.callout(8, rail + (W - rail) / 2, 390)
-        s.callout(1, W - 28, 60)
+        s.callout(2, rail + 4, 80); s.callout(8, rail + (W - rail) / 2, 396)
+        s.callout(1, W - 22, 48)
     else:
-        s.callout(1, W - 28, 60); s.callout(2, rail - 6, 110); s.callout(3, x0 + 20, 90)
-        s.callout(4, x0 + tw - 10, top + 14); s.callout(5, x0 + cw - 10, 612)
-        s.callout(6, x0 + cw - 10, 690); s.callout(7, W - 84, 60)
+        s.callout(1, W - 22, 48); s.callout(7, W - 56, 48); s.callout(2, rail + 4, 80)
+        s.callout(3, x0 + 16, 82); s.callout(4, x0 + tw - 8, top + 8)
+        s.callout(5, x0 + cw - 8, y + 6); s.callout(6, x0 + cw - 8, by + 4)
     s.save("02_home_expanded" if expanded else "02_home_collapsed")
 
 
@@ -178,144 +181,144 @@ def camera():
     s.rect(0, 0, W, H, fill="#20242C")
     s.rect(60, 200, 240, 240, outline=TXT, r=10, width=2)
     s.text(180, 470, "(camera preview)", 12, TXT2, anchor="mm")
-    s.icon(32, 36, "<", 24, TXT)
-    s.text(64, 36, "Camera OCR", 17, TXT, True, "lm")
-    s.icon(W - 88, 36, "F", 24, TXT)
-    s.icon(W - 32, 36, "I", 24, TXT)
-    s.rect(0, 610, W, 150, fill="#000000")
-    s.circle(70, 685, 28, fill="#2A2F3A"); s.text(70, 685, "I", 16, TXT, True, "mm")
-    s.circle(180, 685, 44, fill=TXT, outline=RED, width=4)
-    s.circle(290, 685, 28, fill="#2A2F3A"); s.text(290, 685, "A", 16, TXT, True, "mm")
-    s.callout(1, 32, 60); s.callout(2, W - 88, 60); s.callout(3, W - 32, 60)
-    s.callout(4, 60, 250); s.callout(5, 70, 650); s.callout(6, 180, 630); s.callout(7, 290, 650)
+    s.icon(24, 30, "<", 20, TXT)
+    s.text(46, 30, "Camera OCR", 17, TXT, True, "lm")
+    s.icon(W - 56, 30, "F", 20, TXT)
+    s.icon(W - 22, 30, "I", 20, TXT)
+    s.rect(0, 660, W, 100, fill="#000000")
+    s.circle(80, 706, 14, fill="#2A2F3A"); s.text(80, 706, "I", 11, TXT, True, "mm")
+    s.circle(180, 706, 22, fill=TXT, outline=RED, width=3)
+    s.circle(280, 706, 14, fill="#2A2F3A"); s.text(280, 706, "A", 11, TXT, True, "mm")
+    s.callout(1, 24, 52); s.callout(2, W - 56, 52); s.callout(3, W - 22, 52)
+    s.callout(4, 60, 200); s.callout(5, 80, 682); s.callout(6, 180, 674); s.callout(7, 280, 682)
     s.save("03_camera")
 
 
 def image_import():
     s = Screen("Import")
     s.toolbar("Image Import")
-    for i in range(9):
+    for i in range(12):
         x = 12 + (i % 3) * 114
-        y = 76 + (i // 3) * 114
+        y = 66 + (i // 3) * 114
         s.rect(x, y, 108, 108, fill=BG_HIGH, r=8)
         if i in (0, 1, 4):
             s.rect(x, y, 108, 108, outline=RED, r=8, width=3)
             s.circle(x + 92, y + 16, 10, fill=RED); s.text(x + 92, y + 16, "✓", 11, TXT, True, "mm")
-    s.rect(0, 660, W, 100, fill=BG_SURFACE)
-    s.button(16, 680, 150, 60, "Select images", fill=BG_ELEV, size=15)
-    s.text(180, 710, "3 images selected", 12, TXT2, anchor="lm")
-    s.button(262, 680, 82, 60, "Next", size=16)
-    s.callout(1, 20, 84); s.callout(2, 110, 90); s.callout(3, 30, 676); s.callout(4, 180, 690); s.callout(5, 330, 676)
+    s.rect(0, 710, W, 50, fill=BG_SURFACE)
+    s.button(16, 720, 110, 30, "Select images", fill=BG_ELEV)
+    s.text(140, 735, "3 images selected", 12, TXT2, anchor="lm")
+    s.button(284, 720, 60, 30, "Next")
+    s.callout(1, 22, 48); s.callout(2, 110, 72); s.callout(3, 20, 716); s.callout(4, 150, 718); s.callout(5, 340, 716)
     s.save("04_image_import")
 
 
 def result():
     s = Screen("Result")
     s.toolbar("Translation Result")
-    s.rect(0, 64, W, 330, fill="#D8D2C4")
-    for i in range(6):
-        y = 100 + i * 42
+    s.rect(0, 56, W, 380, fill="#D8D2C4")
+    for i in range(7):
+        y = 90 + i * 44
         s.rect(40, y, 260 - (i % 3) * 40, 26, fill="#EEE8DA", r=6)
         s.text(48, y + 13, "Translated text line", 12, "#222222", anchor="lm")
-    s.rect(W - 86, 76, 74, 24, fill=BG_SURFACE, r=12)
-    s.text(W - 49, 88, "JA → EN", 11, TXT, True, "mm")
-    s.text(16, 412, "SOURCE LANGUAGE", 11, TXT2, True)
-    s.rect(16, 430, W - 32, 70, fill=BG_SURFACE, r=10)
-    s.text(28, 446, "原文テキスト…", 13, TXT)
-    s.text(16, 516, "TARGET LANGUAGE", 11, TXT2, True)
-    s.rect(16, 534, W - 32, 110, fill=BG_SURFACE, outline=DIVIDER, r=10)
-    s.text(28, 550, "Editable translation…", 13, TXT)
+    s.rect(W - 86, 66, 74, 22, fill=BG_SURFACE, r=11)
+    s.text(W - 49, 77, "JA → EN", 11, TXT, True, "mm")
+    s.text(16, 452, "SOURCE LANGUAGE", 11, TXT2, True)
+    s.rect(16, 470, W - 32, 80, fill=BG_SURFACE, r=10)
+    s.text(28, 486, "原文テキスト…", 13, TXT)
+    s.text(16, 566, "TARGET LANGUAGE", 11, TXT2, True)
+    s.rect(16, 584, W - 32, 120, fill=BG_SURFACE, outline=DIVIDER, r=10)
+    s.text(28, 600, "Editable translation…", 13, TXT)
     bw = (W - 32 - 16) / 3
-    s.button(16, 684, bw, 60, "Speak", fill=BG_ELEV, size=15)
-    s.button(16 + bw + 8, 684, bw, 60, "Original", fill=BG_ELEV, size=15)
-    s.button(16 + 2 * (bw + 8), 684, bw, 60, "Save", size=15)
-    s.callout(1, 30, 80); s.callout(2, 180, 230); s.callout(3, W - 90, 76); s.callout(4, W - 30, 440)
-    s.callout(5, W - 30, 544); s.callout(6, 40, 680); s.callout(7, 150, 680); s.callout(8, 270, 680)
+    s.button(16, 718, bw, 30, "Speak", fill=BG_ELEV)
+    s.button(16 + bw + 8, 718, bw, 30, "Show original", fill=BG_ELEV)
+    s.button(16 + 2 * (bw + 8), 718, bw, 30, "Save")
+    s.callout(1, 22, 48); s.callout(2, 180, 250); s.callout(3, W - 90, 66); s.callout(4, W - 28, 478)
+    s.callout(5, W - 28, 592); s.callout(6, 22, 716); s.callout(7, 136, 716); s.callout(8, 252, 716)
     s.save("05_result")
 
 
 def language():
     s = Screen("Language")
     s.toolbar("Language Settings")
-    s.rect(0, 64, W, 52, fill=BG_SURFACE)
-    s.text(90, 90, "Source Language", 14, TXT, True, "mm")
-    s.text(270, 90, "Target Language", 14, TXT2, anchor="mm")
-    s.rect(0, 112, 180, 4, fill=RED)
-    s.rect(16, 132, W - 32, 52, fill=BG_HIGH, r=12)
-    s.text(48, 158, "Search language…", 14, TXT3, anchor="lm")
+    s.rect(0, 56, W, 48, fill=BG_SURFACE)
+    s.text(90, 80, "Source Language", 14, TXT, True, "mm")
+    s.text(270, 80, "Target Language", 14, TXT2, anchor="mm")
+    s.rect(0, 100, 180, 4, fill=RED)
+    s.rect(16, 118, W - 32, 44, fill=BG_HIGH, r=12)
+    s.text(40, 140, "Search language…", 14, TXT3, anchor="lm")
     rows = [("GB", "English", None, True), ("JP", "Japanese (日本語)", None, False),
             ("CN", "Chinese (中文)", "via English — slower, lower quality", False)]
     for i, (f, name, note, sel) in enumerate(rows):
-        y = 200 + i * 76
-        s.rect(16, y, W - 32, 68, fill=BG_SURFACE, r=12)
-        s.text(40, y + 34, f, 16, TXT, True, "lm")
-        s.text(84, y + (24 if note else 34), name, 15, TXT, anchor="lm")
+        y = 176 + i * 68
+        s.rect(16, y, W - 32, 60, fill=BG_SURFACE, r=12)
+        s.text(40, y + 30, f, 16, TXT, True, "lm")
+        s.text(84, y + (20 if note else 30), name, 15, TXT, anchor="lm")
         if note:
-            s.text(84, y + 48, note, 11, ORANGE, anchor="lm")
+            s.text(84, y + 42, note, 11, ORANGE, anchor="lm")
         if sel:
-            s.circle(W - 44, y + 34, 12, fill=RED); s.text(W - 44, y + 34, "✓", 12, TXT, True, "mm")
-    s.callout(1, 20, 76); s.callout(2, 24, 140); s.callout(3, 24, 206); s.callout(4, W - 30, 356); s.callout(5, W - 30, 206)
+            s.circle(W - 44, y + 30, 10, fill=RED); s.text(W - 44, y + 30, "✓", 11, TXT, True, "mm")
+    s.callout(1, 20, 66); s.callout(2, 24, 124); s.callout(3, 24, 182); s.callout(4, W - 28, 318); s.callout(5, W - 28, 182)
     s.save("06_language")
 
 
 def pdf():
     s = Screen("PDF")
     s.toolbar("PDF OCR")
-    s.rect(16, 80, W - 32, 90, fill=BG_SURFACE, outline=DIVIDER, r=14)
-    s.icon(56, 125, "P", 36, RED)
-    s.text(90, 112, "report.pdf", 15, TXT, True)
-    s.text(90, 136, "2.4 MB · 12 pages", 12, TXT2)
-    s.icon(W - 48, 125, "×", 32, TXT2)
+    s.rect(16, 72, W - 32, 76, fill=BG_SURFACE, outline=DIVIDER, r=14)
+    s.icon(48, 110, "P", 30, RED)
+    s.text(76, 98, "report.pdf", 15, TXT, True)
+    s.text(76, 120, "2.4 MB · 12 pages", 12, TXT2)
+    s.icon(W - 40, 110, "×", 24, TXT2)
     for i, (k, v) in enumerate([("Page Range", "All Pages"), ("Output Format", "PDF")]):
-        y = 186 + i * 68
-        s.rect(16, y, W - 32, 64, fill=BG_SURFACE, r=12)
-        s.text(32, y + 32, k, 15, TXT, anchor="lm")
-        s.text(W - 50, y + 32, v, 14, TXT2, anchor="rm")
-    s.rect(16, 330, W - 32, 64, fill=BG_SURFACE, r=14)
-    s.text(40, 362, "EN  English", 15, TXT, anchor="lm"); s.text(W - 40, 362, "Chinese  ZH", 15, TXT, anchor="rm")
-    s.button(16, 412, W - 32, 60, "Start OCR")
-    s.text(180, 494, "Supported formats: PDF, JPG, PNG, BMP…", 11, TXT3, anchor="mm")
-    s.rect(16, 516, W - 32, 150, fill=BG_SURFACE, r=10)
-    s.text(28, 532, "Saved …/exports/translated_….pdf", 11, TXT2)
-    s.callout(1, 24, 86); s.callout(2, W - 30, 100); s.callout(3, 24, 192); s.callout(4, 24, 260)
-    s.callout(5, 24, 336); s.callout(6, 24, 418); s.callout(7, 24, 522)
+        y = 162 + i * 40
+        s.rect(16, y, W - 32, 34, fill=BG_SURFACE, r=8)
+        s.text(30, y + 17, k, 14, TXT, anchor="lm")
+        s.text(W - 40, y + 17, v, 13, TXT2, anchor="rm")
+    s.rect(16, 252, W - 32, 52, fill=BG_SURFACE, r=14)
+    s.text(36, 278, "EN  English", 14, TXT, anchor="lm"); s.text(W - 36, 278, "Chinese  ZH", 14, TXT, anchor="rm")
+    s.button(16, 318, W - 32, 30, "Start OCR")
+    s.text(180, 366, "Supported formats: PDF, JPG, PNG, BMP…", 11, TXT3, anchor="mm")
+    s.rect(16, 384, W - 32, 150, fill=BG_SURFACE, r=10)
+    s.text(28, 400, "Saved …/exports/translated_….pdf", 11, TXT2)
+    s.callout(1, 22, 78); s.callout(2, W - 24, 96); s.callout(3, 22, 166); s.callout(4, 22, 206)
+    s.callout(5, 22, 258); s.callout(6, 22, 322); s.callout(7, 22, 390)
     s.save("07_pdf")
 
 
 def history():
     s = Screen("History")
     s.toolbar("History", action="Del")
-    for i in range(6):
-        y = 72 + i * 80
-        s.rect(16, y, W - 32, 72, fill=BG_SURFACE, r=12)
-        s.icon(48, y + 36, ["I", "P", "T"][i % 3], 28, TXT2)
-        s.text(80, y + 24, "First line of recognised text…", 14, TXT)
-        s.text(80, y + 50, "JA → EN", 11, RED, True)
-        s.text(W - 32, y + 50, "2026-09-25 10:4" + str(i), 11, TXT3, anchor="ra")
-    s.callout(1, W - 32, 58); s.callout(2, 24, 78); s.callout(3, 150, 128)
+    for i in range(8):
+        y = 64 + i * 72
+        s.rect(16, y, W - 32, 64, fill=BG_SURFACE, r=12)
+        s.icon(44, y + 32, ["I", "P", "T"][i % 3], 22, TXT2)
+        s.text(72, y + 20, "First line of recognised text…", 14, TXT)
+        s.text(72, y + 44, "JA → EN", 11, RED, True)
+        s.text(W - 28, y + 44, "2026-09-25 10:4" + str(i), 11, TXT3, anchor="ra")
+    s.callout(1, W - 22, 48); s.callout(2, 22, 70); s.callout(3, 150, 118)
     s.save("08_history")
 
 
 def settings():
     s = Screen("Settings")
     s.toolbar("Settings")
-    y = 76
+    y = 68
     groups = [("GENERAL", [("OCR Language", "Auto"), ("Image Quality", "HIGH"), ("Auto Translation", "switch")]),
               ("TRANSLATION", [("Default Source Language", "English"), ("Default Target Language", "Chinese")]),
               ("OTHER", [("Installed Models", "3 / 4"), ("About", "v1.0"), ("Help & Feedback", "")])]
     n = 1
     for g, rows in groups:
-        s.text(16, y, g, 11, TXT2, True); y += 22
+        s.text(16, y, g, 11, TXT2, True); y += 20
         for k, v in rows:
-            s.rect(0, y, W, 64, fill=BG_SURFACE)
-            s.icon(32, y + 32, "•", 20, TXT2)
-            s.text(60, y + 32, k, 15, TXT, anchor="lm")
+            s.rect(0, y, W, 32, fill=BG_SURFACE)
+            s.icon(24, y + 16, "•", 14, TXT2)
+            s.text(44, y + 16, k, 14, TXT, anchor="lm")
             if v == "switch":
-                s.rect(W - 64, y + 20, 44, 24, fill=RED, r=12); s.circle(W - 32, y + 32, 10, fill=TXT)
+                s.rect(W - 56, y + 7, 34, 18, fill=RED, r=9); s.circle(W - 31, y + 16, 7, fill=TXT)
             else:
-                s.text(W - 36, y + 32, v, 13, TXT2, anchor="rm")
-            s.callout(n, W - 12, y + 10); n += 1
-            y += 65
+                s.text(W - 28, y + 16, v, 12, TXT2, anchor="rm")
+            s.callout(n, W - 10, y + 8); n += 1
+            y += 33
         y += 12
     s.save("09_settings")
 
@@ -323,20 +326,20 @@ def settings():
 def translate():
     s = Screen("Translate")
     s.toolbar("Translation")
-    s.rect(16, 80, W - 32, 64, fill=BG_SURFACE, r=14)
-    s.text(40, 112, "EN  English", 15, TXT, anchor="lm"); s.text(W - 40, 112, "Japanese  JA", 15, TXT, anchor="rm")
-    s.rect(16, 158, W - 32, 170, fill=BG_SURFACE, outline=DIVIDER, r=12)
-    s.text(28, 174, "Enter text to translate", 14, TXT3)
-    s.icon(W - 44, 300, "Cp", 28, TXT2)
-    s.text(W - 80, 300, "0/500", 11, TXT3, anchor="rm")
-    s.button(16, 342, W - 32, 60, "Translate")
-    s.rect(16, 418, W - 32, 190, fill=BG_HIGH, r=12)
-    s.text(28, 434, "Japanese (日本語)", 12, TXT2, True)
-    s.icon(W - 44, 440, "Cp", 28, TXT2)
-    s.text(28, 470, "Translated text appears here", 14, TXT)
-    s.text(28, 620, "via English — slower, lower quality", 11, ORANGE)
-    s.callout(1, 24, 86); s.callout(2, 24, 166); s.callout(3, W - 20, 286); s.callout(4, 24, 348)
-    s.callout(5, 24, 424); s.callout(6, W - 20, 426); s.callout(7, 24, 616)
+    s.rect(16, 72, W - 32, 52, fill=BG_SURFACE, r=14)
+    s.text(36, 98, "EN  English", 14, TXT, anchor="lm"); s.text(W - 36, 98, "Japanese  JA", 14, TXT, anchor="rm")
+    s.rect(16, 138, W - 32, 170, fill=BG_SURFACE, outline=DIVIDER, r=12)
+    s.text(28, 154, "Enter text to translate", 14, TXT3)
+    s.icon(W - 38, 288, "Cp", 20, TXT2)
+    s.text(W - 60, 288, "0/500", 11, TXT3, anchor="rm")
+    s.button(16, 320, W - 32, 30, "Translate")
+    s.rect(16, 364, W - 32, 190, fill=BG_HIGH, r=12)
+    s.text(28, 380, "Japanese (日本語)", 12, TXT2, True)
+    s.icon(W - 38, 386, "Cp", 20, TXT2)
+    s.text(28, 414, "Translated text appears here", 14, TXT)
+    s.text(28, 566, "via English — slower, lower quality", 11, ORANGE)
+    s.callout(1, 22, 78); s.callout(2, 22, 144); s.callout(3, W - 16, 274); s.callout(4, 22, 324)
+    s.callout(5, 22, 370); s.callout(6, W - 16, 372); s.callout(7, 22, 562)
     s.save("10_translate")
 
 

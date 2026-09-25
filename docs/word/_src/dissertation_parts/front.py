@@ -82,8 +82,8 @@ def build(c):
         "chooses the largest feasible font size under high-quality line breaking in a bounded number of "
         "layouts.",
         "The engine implements English, Korean, Japanese and Chinese; the deployed user interface "
-        "exposes three of them through a single build-time list, and uses large, screen-relative touch "
-        "targets and a collapsible overlay side menu for one-handed use. The dissertation specifies a "
+        "exposes three of them through a single build-time list, and uses compact, screen-relative control "
+        "sizes and a collapsible overlay side menu. The dissertation specifies a "
         "full evaluation protocol for five research questions: faithfulness of the library-free "
         "detection post-processing against the reference implementation on ICDAR 2015 and MLT-2019; "
         "recognition accuracy with and without orientation correction; translation quality on "

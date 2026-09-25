@@ -93,9 +93,9 @@ public final class MainActivity extends BaseActivity {
      * <p>Collapsed, the menu is a narrow rail of icons that the content always
      * leaves room for. Expanded, it widens over the content, adds a label to each
      * icon and dims the rest of the screen; tapping the dimmed area or pressing
-     * Back collapses it again. It overlays rather than pushes because pushing
-     * would squeeze the home tiles to a sliver on a phone. For the same reason
-     * the menu always starts collapsed instead of restoring its last state.
+     * Back collapses it again. It overlays rather than pushes so that opening it
+     * never reflows or narrows the home content; since it covers the content
+     * while open, it always starts collapsed instead of restoring its last state.
      */
     private void bindNavToggle() {
         navRail = findViewById(R.id.nav_rail);

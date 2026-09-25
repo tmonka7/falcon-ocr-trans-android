@@ -78,26 +78,42 @@
     </style>
 
     <!-- Buttons are sized from dimens tokens so they scale with the screen
-         (values-sw600dp); see dimens.xml for the rationale. -->
+         (values-sw600dp). Material's default 6dp top/bottom insets and 48dp
+         minimum are removed, or the compact button_height would not apply. -->
     <style name="Widget.Falcon.Button.Primary" parent="Widget.Material3.Button">
         <item name="android:textSize">@dimen/button_text</item>
         <item name="android:textStyle">bold</item>
         <item name="android:minHeight">@dimen/button_height</item>
         <item name="backgroundTint">@color/brand_red</item>
-        <item name="cornerRadius">14dp</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:minWidth">0dp</item>
     </style>
 
     <style name="Widget.Falcon.Button.Tonal" parent="Widget.Material3.Button.TonalButton">
         <item name="android:textSize">@dimen/button_text</item>
         <item name="android:minHeight">@dimen/button_height</item>
-        <item name="cornerRadius">14dp</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:minWidth">0dp</item>
     </style>
 
     <style name="Widget.Falcon.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:textSize">@dimen/button_text</item>
         <item name="android:minHeight">@dimen/button_height</item>
         <item name="android:textColor">@color/text_primary</item>
-        <item name="cornerRadius">14dp</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:minWidth">0dp</item>
     </style>
 
 </resources>

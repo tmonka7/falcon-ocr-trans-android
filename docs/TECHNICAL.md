@@ -79,39 +79,44 @@ All processing happens on the device. No image or text leaves it.
   Loading a new pair closes the previous one. A pivoted page loads two pairs in
   sequence, once each, not once per paragraph.
 - **PDF:** pages are rasterised, processed and released one at a time. At
-  200 dpi, one A4 page is ≈23 MB as ARGB_8888.
+  200 dpi, one A4 page (1654 × 2339 px) is ≈15.5 MB as ARGB_8888.
 
 ### 2.4 User interface sizing and the side menu
 
-- **Screen-relative controls.** Every control size is a dimension token.
+- **Compact, screen-relative controls.** Every control size is a dimension token.
   `res/values/dimens.xml` holds the phone values and
   `res/values-sw600dp/dimens.xml` the tablet values, so all controls grow with
   the screen class. The main tokens are:
 
   | Token | Phone | Tablet |
   |---|---|---|
-  | `button_height` | 60 dp | 72 dp |
-  | `icon_button` | 56 dp | 64 dp |
-  | `icon_button_small` | 48 dp | 56 dp |
-  | `shutter_size` | 88 dp | 108 dp |
-  | `row_min_height` | 64 dp | 76 dp |
+  | `button_height` / `button_text` | 30 dp / 12 sp | 36 dp / 14 sp |
+  | `icon_button` | 28 dp | 32 dp |
+  | `icon_button_small` | 24 dp | 28 dp |
+  | `shutter_size` | 44 dp | 54 dp |
+  | `row_min_height` | 32 dp | 38 dp |
+  | `tile_min_height` | 70 dp | 100 dp |
 
-  The `Widget.Falcon.Button.*` styles read these tokens.
-- **Home tiles fill the screen.** The home column is `match_parent` inside a
-  `ScrollView` with `fillViewport`, and both tile rows have weight 1. The
-  tiles therefore share whatever height is left. On short or landscape
-  screens, `tile_min_height` (140 / 200 dp) wins and the column scrolls.
+  The `Widget.Falcon.Button.*` styles read these tokens. They also remove
+  Material's default 6 dp insets and 48 dp minimum height; without that, the
+  30 dp height would not apply.
+- **Accessibility trade-off.** Several touch targets are below Android's
+  48 dp guideline. This was requested for a compact look. If accessibility
+  takes priority, raise the tokens in `dimens.xml`.
+- **Home tiles are compact.** Tiles wrap to their content, at least
+  `tile_min_height`. They do not stretch to fill the screen, and the column
+  scrolls on short screens.
 - **Collapsible side menu** (`MainActivity.bindNavToggle` / `applyNavState`):
-  - Collapsed, it is an icon rail (`nav_rail_width`, 80 / 104 dp). The content
+  - Collapsed, it is an icon rail (`nav_rail_width`, 40 / 52 dp). The content
     reserves that width with `marginStart`, so the rail never covers a tile.
   - The right-hand title-bar button `main_nav_toggle` animates the rail to
-    `nav_rail_expanded_width` (208 / 280 dp) over the content, fades in a
+    `nav_rail_expanded_width` (104 / 140 dp) over the content, fades in a
     scrim (`nav_scrim`) and fades the labels in. The animation takes 220 ms.
   - The toggle, a tap on the scrim, or Back collapses it. Back is handled by
     an `OnBackPressedCallback` that is enabled only while the menu is expanded.
-  - The menu overlays the content rather than pushing it: pushing would leave
-    about 50 dp per tile on a 360 dp phone. For the same reason it always
-    starts collapsed, and its state is not saved.
+  - The menu overlays the content rather than pushing it, so opening it
+    never reflows or narrows the home content. Because it covers the content
+    while open, it always starts collapsed and its state is not saved.
   - Every menu item carries its label as content description. Collapsed items
     also carry it as a tooltip.
 
@@ -248,6 +253,23 @@ encoder. `tools/convert_mt.py` flattens the protobuf model into a
 log-probabilities). Unknown characters cost −10. `▁` (U+2581) marks word
 boundaries. This code fails quietly, not loudly, which is why it has unit tests.
 
+**Vocabularies (`MtVocab`).** Pieces are mapped to ids through `vocab.tsv`,
+which is the *target* vocabulary and also decodes the output. Most OPUS-MT
+releases use one joint vocabulary, so that single table serves both sides.
+
+The en-ko model (`opus-mt-tc-big-en-ko`) is different. It was trained with
+separate source and target vocabularies over one tied embedding matrix, so
+English must be encoded with its own table, `source_vocab.tsv`, which
+`MarianTranslator` uses whenever the file is present.
+
+The published Hugging Face tokenizer for that model ships only the Korean
+vocabulary. As a result, the unmodified checkpoint (and anything exported from
+it) turns English input into wrong ids and emits fluent nonsense. Only 20.8% of
+its source pieces even exist in the published vocabulary.
+`tools/mt_train/fix_en_ko_base.py` builds a corrected copy. `convert_mt.py`
+uses it and writes `source_vocab.tsv`. Any en-ko model exported before this
+fix must be re-exported.
+
 **Decoding (`MarianTranslator`).**
 
 - The encoder runs once per chunk. The decoder runs greedily from
@@ -338,8 +360,9 @@ It stays visible as a ghost, and the page texture shows through.
   `[0.45·p, 1.15·p]` whose `StaticLayout` height fits the target, where
   `p = 0.82 × line height`. It is a binary search to 0.25 px, which relies on
   layout height being non-decreasing in `s`. If even the minimum size
-  overflows, it is used and the text is clipped (`Fit.overflowed = true`),
-  because a slightly cropped translation is better than a blank. Line breaking
+  overflows, it is used anyway and flagged (`Fit.overflowed = true`). No clip is
+  set, so the text runs past the bottom of its box rather than being cut off;
+  overflowing text is better than a blank. Line breaking
   uses `BREAK_STRATEGY_HIGH_QUALITY`; without it, CJK text never wraps.
 - **Halo (`halo = true`).** The same `StaticLayout` is drawn twice. First
   as a stroke in the paper colour, width `0.16 × fitted size` with round joins,
@@ -409,7 +432,7 @@ full tree. Summary:
 | `ocr/rec/korean` | `korean_PP-OCRv3_rec` | Bundled; not user-facing (§7) |
 | `ocr/rec/japan` | `japan_PP-OCRv3_rec` | |
 | `ocr/rec/chinese` | `ch_PP-OCRv4_rec` + `ppocr_keys_v1.txt` | |
-| `mt/{en↔ko, en↔ja, en↔zh}` | OPUS-MT (`en-ko` is `tc-big`) | int8 dynamic, per-channel |
+| `mt/{en↔ko, en↔ja, en↔zh}` | OPUS-MT (`en-ko` is `tc-big`, exported via the corrected tokenizer) | int8 dynamic, per-channel |
 
 `tools/fix_onnx_concat.py` inserts `Unsqueeze` before rank-mismatched `Concat`
 inputs emitted by paddle2onnx. Without it, ONNX Runtime refuses to load the v4

@@ -12,10 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The token to id table shared by an OPUS-MT pair's encoder and decoder.
+ * A token to id table for one side of an OPUS-MT pair.
  *
- * <p>Marian models use one joint vocabulary for both languages, which is why a
- * single table serves the source and target sides.
+ * <p>Most Marian releases use one joint vocabulary for both languages, so a
+ * single table serves the source and target sides. Models trained with separate
+ * vocabularies (the tc-big en-ko release) ship a second, source-side table; see
+ * {@link com.falcon.ocrtrans.engine.ModelPaths#mtSourceVocab}. Using the target
+ * table to encode their input silently feeds the encoder wrong ids and yields
+ * fluent nonsense, so that case must not fall back.
  */
 public final class MtVocab {
 

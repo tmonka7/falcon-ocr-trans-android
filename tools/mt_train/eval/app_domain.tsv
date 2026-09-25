@@ -1,0 +1,95 @@
+en	ko	category
+# Hand-written evaluation set for the app's domain: short text as it appears on signs, menus, screens,
+# forms, labels and notices. DRAFT: written without native-speaker review; have it checked before
+# reporting results on it. Never used for training (prepare_data.py decontaminates against it).
+Exit	출구	sign
+Entrance	입구	sign
+Emergency Exit	비상구	sign
+No Smoking	금연	sign
+No Entry	출입 금지	sign
+Restroom	화장실	sign
+Staff Only	관계자 외 출입 금지	sign
+Push	미세요	sign
+Pull	당기세요	sign
+Caution: Wet Floor	주의: 바닥이 미끄럽습니다	sign
+Please do not touch.	만지지 마세요.	sign
+Keep out of reach of children.	어린이의 손이 닿지 않는 곳에 보관하세요.	label
+Elevator out of service	엘리베이터 운행 중지	sign
+Please wait here.	여기에서 기다려 주세요.	sign
+Parking lot is full.	주차장이 만차입니다.	sign
+Closed on Mondays	월요일 휴무	notice
+Open 24 hours	24시간 영업	notice
+Business hours: 9:00 AM to 6:00 PM	영업시간: 오전 9시~오후 6시	notice
+Temporarily closed for renovation.	리모델링 공사로 임시 휴업합니다.	notice
+Cash only	현금만 가능	notice
+Credit cards accepted	신용카드 사용 가능	notice
+Free Wi-Fi	무료 와이파이	notice
+Platform 3	3번 승강장	transit
+Transfer to Line 2	2호선 환승	transit
+This train is bound for Seoul Station.	이 열차는 서울역행입니다.	transit
+The next stop is City Hall.	다음 역은 시청입니다.	transit
+Doors open on the left.	내리실 문은 왼쪽입니다.	transit
+Bus stop	버스 정류장	transit
+Ticket office	매표소	transit
+Departures	출발	transit
+Arrivals	도착	transit
+Baggage claim	수하물 찾는 곳	transit
+Gate 12	12번 게이트	transit
+Boarding pass	탑승권	transit
+Priority seating for elderly and disabled passengers	노약자석	transit
+Today's special	오늘의 특선 메뉴	menu
+Set menu	세트 메뉴	menu
+Beef bulgogi	소불고기	menu
+Kimchi stew	김치찌개	menu
+Spicy stir-fried pork	제육볶음	menu
+Cold noodles	냉면	menu
+Steamed rice	공깃밥	menu
+Soft drinks	음료수	menu
+Iced Americano	아이스 아메리카노	menu
+Refills are free.	리필은 무료입니다.	menu
+Tax and service charge included.	세금 및 봉사료 포함.	menu
+Contains nuts.	견과류가 함유되어 있습니다.	label
+Best before: see bottom of can.	유통기한: 캔 하단 표기일까지.	label
+Keep refrigerated.	냉장 보관하세요.	label
+Store in a cool, dry place.	서늘하고 건조한 곳에 보관하세요.	label
+Shake well before use.	사용 전에 잘 흔들어 주세요.	label
+For external use only.	외용으로만 사용하세요.	medical
+Take one tablet three times a day after meals.	1일 3회, 식후에 1정씩 복용하세요.	medical
+Do not exceed the recommended dose.	권장 용량을 초과하지 마세요.	medical
+May cause drowsiness.	졸음을 유발할 수 있습니다.	medical
+Consult a doctor if symptoms persist.	증상이 계속되면 의사와 상담하세요.	medical
+Pharmacy	약국	medical
+Emergency room	응급실	medical
+Name	이름	form
+Date of birth	생년월일	form
+Address	주소	form
+Phone number	전화번호	form
+Nationality	국적	form
+Passport number	여권 번호	form
+Signature	서명	form
+Please fill in all required fields.	필수 항목을 모두 입력해 주세요.	form
+Please write in block capitals.	대문자로 작성해 주세요.	form
+Settings	설정	ui
+Cancel	취소	ui
+Save changes	변경 사항 저장	ui
+Delete	삭제	ui
+Are you sure you want to delete this file?	이 파일을 삭제하시겠습니까?	ui
+Your password has been changed.	비밀번호가 변경되었습니다.	ui
+Network connection failed.	네트워크 연결에 실패했습니다.	ui
+Please try again later.	잠시 후 다시 시도해 주세요.	ui
+Download complete	다운로드 완료	ui
+Low battery	배터리 부족	ui
+Sign in	로그인	ui
+Forgot your password?	비밀번호를 잊으셨나요?	ui
+Terms and Conditions	이용 약관	document
+Privacy Policy	개인정보 처리방침	document
+Invoice	청구서	document
+Receipt	영수증	document
+Total amount	합계 금액	document
+Due date	납부 기한	document
+This offer is valid until December 31.	본 행사는 12월 31일까지 유효합니다.	notice
+Lost and found	분실물 센터	sign
+Information desk	안내 데스크	sign
+Please turn off your mobile phone.	휴대전화를 꺼 주세요.	notice
+Photography is prohibited in this area.	이 구역에서는 사진 촬영이 금지되어 있습니다.	notice
+Watch your step.	발밑을 조심하세요.	sign

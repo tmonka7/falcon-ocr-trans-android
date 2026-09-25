@@ -45,6 +45,41 @@ _CITE = re.compile(r"\[@([A-Za-z0-9_,\s\-]+)\]")
 class ThesisDoc(Doc):
     """Doc with subscript/superscript markup; everything else inherited."""
 
+    def _caption(self, kind, label, text):
+        """Caption with a literal chapter-based label ("Table 4.2").
+
+        Doc._caption uses a SEQ field, which Word renumbers 1..n when it updates
+        fields and would break chapter numbering. Here captions carry plain text in
+        dedicated "Table Caption" / "Figure Caption" styles, and the lists of tables
+        and figures are TOC fields over those styles (see list_of)."""
+        para = self.d.add_paragraph(style=self._caption_style(kind))
+        para.paragraph_format.keep_with_next = kind == "Table"
+        self._fill(para, f"{kind} {label}. {text}")
+
+    def _caption_style(self, kind):
+        from docx.enum.style import WD_STYLE_TYPE
+        name = f"{kind} Caption"
+        styles = self.d.styles
+        try:
+            return styles[name]
+        except KeyError:
+            st = styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH)
+            st.base_style = styles["Caption"]
+            st.quick_style = True
+            return st
+
+    def list_of(self, kind):
+        from docgen import _add_field, ACCENT
+        self._caption_style(kind)
+        p = self.d.add_paragraph()
+        r = p.add_run(f"List of {kind}s")
+        r.font.size = Pt(17)
+        r.font.bold = True
+        r.font.color.rgb = ACCENT
+        p = self.d.add_paragraph()
+        _add_field(p.add_run(), f'TOC \\h \\z \\t "{kind} Caption,1"')
+        self.page_break()
+
     def _fill(self, paragraph, text, *, bold=False, italic=False, size=None, color=None):
         for piece in _RICH.split(text or ""):
             if not piece:
@@ -90,7 +125,7 @@ class Ctx:
         self.d = ThesisDoc(
             title="Offline Layout-Preserving Image Translation on Smartphones",
             body_font="Times New Roman", body_size=12, line_spacing=1.5,
-            heading_font="Times New Roman", margins_cm=(2.5, 2.5, 2.5, 3.0))
+            heading_font="Times New Roman", margins_cm=(2.5, 2.2, 2.5, 2.5))
 
     # ------------------------------------------------------------- references
     def cite(self, keys: str) -> str:

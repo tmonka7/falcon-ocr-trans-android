@@ -80,10 +80,24 @@ public final class ModelPaths {
         return mtDir(from, to) + "/source.spm.tsv";
     }
 
-    /** Token to id table shared by both sides: {@code token<TAB>id} per line. */
+    /**
+     * Token to id table: {@code token<TAB>id} per line. This is the target
+     * vocabulary, used to decode output; for joint-vocabulary models it also
+     * serves the source side.
+     */
     @NonNull
     public static String mtVocab(@NonNull Lang from, @NonNull Lang to) {
         return mtDir(from, to) + "/vocab.tsv";
+    }
+
+    /**
+     * Optional source-side table, present only for models trained with separate
+     * vocabularies (the tc-big en-ko release). Absent means {@link #mtVocab}
+     * serves both sides.
+     */
+    @NonNull
+    public static String mtSourceVocab(@NonNull Lang from, @NonNull Lang to) {
+        return mtDir(from, to) + "/source_vocab.tsv";
     }
 
     /** Special token ids and decode limits, written by the conversion script. */

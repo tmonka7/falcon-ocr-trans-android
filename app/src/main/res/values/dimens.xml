@@ -1,38 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Size tokens. Touch targets are deliberately large: the app is used one-handed,
-    often while holding a document or standing in front of a sign. Tablet values
-    live in values-sw600dp, so every control grows with the screen; the home tiles
-    additionally stretch to fill whatever height is left (see activity_main).
+    Size tokens. Controls are compact; tablet values live in values-sw600dp so
+    every control still scales with the screen class.
+
+    Several touch targets (icon_button_small, nav items, button_height) are
+    below Android's 48 dp accessibility guideline. That is a deliberate choice
+    for a compact interface; raise these tokens if accessibility takes priority.
 -->
 <resources>
     <dimen name="gutter">16dp</dimen>
     <dimen name="gutter_small">12dp</dimen>
     <dimen name="card_radius">14dp</dimen>
-    <dimen name="toolbar_height">64dp</dimen>
+    <dimen name="toolbar_height">56dp</dimen>
     <dimen name="flag_size">26dp</dimen>
 
     <!-- Buttons -->
-    <dimen name="button_height">60dp</dimen>
-    <dimen name="button_text">18sp</dimen>
-    <dimen name="icon_button">56dp</dimen>
-    <dimen name="icon_button_small">48dp</dimen>
-    <dimen name="shutter_size">88dp</dimen>
-    <dimen name="row_min_height">64dp</dimen>
+    <dimen name="button_height">30dp</dimen>
+    <dimen name="button_text">12sp</dimen>
+    <dimen name="icon_button">28dp</dimen>
+    <dimen name="icon_button_small">24dp</dimen>
+    <dimen name="shutter_size">44dp</dimen>
+    <dimen name="row_min_height">32dp</dimen>
 
     <!-- Home action tiles -->
-    <dimen name="tile_min_height">140dp</dimen>
-    <dimen name="tile_icon">44dp</dimen>
-    <dimen name="tile_title">20sp</dimen>
-    <dimen name="tile_subtitle">13sp</dimen>
+    <dimen name="tile_min_height">70dp</dimen>
+    <dimen name="tile_padding">9dp</dimen>
+    <dimen name="tile_icon">22dp</dimen>
+    <dimen name="tile_title">14sp</dimen>
+    <dimen name="tile_subtitle">11sp</dimen>
     <dimen name="banner_height">110dp</dimen>
 
     <!-- Side menu: collapsed shows icons only, expanded adds labels. -->
-    <dimen name="nav_rail_width">80dp</dimen>
-    <dimen name="nav_rail_expanded_width">208dp</dimen>
-    <dimen name="nav_item_height">64dp</dimen>
-    <dimen name="nav_icon">30dp</dimen>
-    <dimen name="nav_label">16sp</dimen>
-    <!-- Centres the icon in the collapsed rail: (rail - 2*8dp margin - icon) / 2. -->
-    <dimen name="nav_item_padding_start">17dp</dimen>
+    <dimen name="nav_rail_width">40dp</dimen>
+    <dimen name="nav_rail_expanded_width">104dp</dimen>
+    <dimen name="nav_item_height">32dp</dimen>
+    <dimen name="nav_icon">15dp</dimen>
+    <dimen name="nav_label">12sp</dimen>
+    <!-- Centres the icon in the collapsed rail: (rail - 2*4dp margin - icon) / 2. -->
+    <dimen name="nav_item_padding_start">8dp</dimen>
 </resources>

@@ -175,7 +175,7 @@ public final class MarianTranslator implements Translator {
 
         long[] inputIds = new long[pieces.size() + 1];
         for (int i = 0; i < pieces.size(); i++) {
-            inputIds[i] = pair.vocab.idOf(pieces.get(i));
+            inputIds[i] = pair.sourceVocab.idOf(pieces.get(i));
         }
         inputIds[pieces.size()] = pair.config.eosId;
 
@@ -303,6 +303,10 @@ public final class MarianTranslator implements Translator {
                     decoder,
                     SpmEncoder.load(context, ModelPaths.mtSourceSpm(from, to)),
                     MtVocab.load(context, ModelPaths.mtVocab(from, to)),
+                    // Separate-vocabulary models encode with their own source table.
+                    Assets.exists(context, ModelPaths.mtSourceVocab(from, to))
+                            ? MtVocab.load(context, ModelPaths.mtSourceVocab(from, to))
+                            : null,
                     MtConfig.load(context, ModelPaths.mtConfig(from, to)));
             pair.resolveInputNames();
             loaded = pair;
@@ -331,7 +335,10 @@ public final class MarianTranslator implements Translator {
         final OrtSession encoder;
         final OrtSession decoder;
         final SpmEncoder spm;
+        /** Target vocabulary: decodes generated ids. */
         final MtVocab vocab;
+        /** Encodes source pieces; the same table as {@link #vocab} for joint vocabularies. */
+        final MtVocab sourceVocab;
         final MtConfig config;
 
         String encInputIds = "input_ids";
@@ -341,12 +348,13 @@ public final class MarianTranslator implements Translator {
         String decEncoderHidden = "encoder_hidden_states";
 
         LoadedPair(String key, OrtSession encoder, OrtSession decoder,
-                   SpmEncoder spm, MtVocab vocab, MtConfig config) {
+                   SpmEncoder spm, MtVocab vocab, @Nullable MtVocab sourceVocab, MtConfig config) {
             this.key = key;
             this.encoder = encoder;
             this.decoder = decoder;
             this.spm = spm;
             this.vocab = vocab;
+            this.sourceVocab = sourceVocab != null ? sourceVocab : vocab;
             this.config = config;
         }
 

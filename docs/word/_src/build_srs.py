@@ -17,7 +17,7 @@ def build() -> Path:
     d.revision_history([
         ("0.9", "2026-09-24", "[Author]", "Requirements derived from the implemented system."),
         ("1.0", DATE, "[Author]", "Adds translucent re-rendering (FR-11), Korean UI gating (FR-21), "
-                                  "large screen-relative controls (FR-22) and the collapsible side menu (FR-23)."),
+                                  "compact screen-relative controls (FR-22) and the collapsible side menu (FR-23)."),
     ])
     d.toc()
 
@@ -72,7 +72,7 @@ def build() -> Path:
     d.h(2, "2.3 User classes")
     d.table(["User class", "Characteristics", "Main needs"], [
         ("Traveller", "Occasional, often one-handed, variable light and connectivity",
-         "Fast capture; large controls; works offline"),
+         "Fast capture; simple controls; works offline"),
         ("Office / student user", "Documents and PDFs, repeated use", "PDF output, batch import, history"),
         ("Privacy-sensitive user", "Medical, legal, identity documents", "Guarantee that nothing leaves the device"),
         ("Maintainer / developer", "Builds, adds models or languages", "Clear model tree, validation, one-line language gating"),
@@ -115,8 +115,9 @@ def build() -> Path:
     d.p("Ten screens, specified in FOT-SDS-001. General rules:")
     d.bullets([
         "Dark theme throughout (background #070A12, surfaces #101726, brand red #E02020).",
-        "Large, screen-relative controls (FR-22): home tiles share the free height; primary and tonal "
-        "buttons 60 dp / 72 dp; icon buttons 56 dp / 64 dp; minimum touch target 48 dp.",
+        "Compact, screen-relative controls (FR-22): buttons 30 dp / 36 dp tall; icon buttons 28 dp / 32 dp; "
+        "small icon buttons 24 dp / 28 dp; home tiles about 70 dp / 100 dp. Several touch targets are below the "
+        "48 dp accessibility guideline by design (KI-07).",
         "Home has a side menu collapsed to icons by default; the right-hand title-bar button expands "
         "it over the content (FR-23).",
         "Long operations show a blocking progress overlay with an optional detail line (e.g. 'Page 3 of 12').",

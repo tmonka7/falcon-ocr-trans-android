@@ -133,9 +133,9 @@ def sequence_capture():
 def nav_state():
     c = Canvas(1500, 620)
     c.text(750, 16, "Side menu state machine (MainActivity)", 26, INK, True, "ma")
-    c.box(120, 180, 420, 200, "COLLAPSED", ["rail 80 / 104 dp, icons only", "tooltips + content descriptions",
+    c.box(120, 180, 420, 200, "COLLAPSED", ["rail 40 / 52 dp, icons only", "tooltips + content descriptions",
                                             "scrim GONE, Back callback off", "icon: menu"], fill=FILL3)
-    c.box(960, 180, 420, 200, "EXPANDED", ["rail 208 / 280 dp over content", "labels visible, scrim shown",
+    c.box(960, 180, 420, 200, "EXPANDED", ["rail 104 / 140 dp over content", "labels visible, scrim shown",
                                            "Back callback on", "icon: menu_open"], fill=FILL2)
     c.arrow(540, 230, 960, 230, "")
     c.text(750, 196, "right-hand toggle", 18, RED, True, "ma")

@@ -136,7 +136,8 @@ def build(c):
         "**An evaluation protocol with pre-specified hypotheses.** Datasets, metrics, device protocol, "
         "ablations and a within-subjects user study with a mixed-effects analysis plan, together with "
         "result tables that are deliberately left empty until the protocol is executed (Chapters 8 and 9).",
-        "**A usable system.** The implementation includes large, screen-relative touch targets, a "
+        "**A usable system.** The implementation includes compact, screen-relative control sizes defined as "
+        "dimension tokens, a "
         "collapsible overlay side menu and language gating that allows a fully implemented language to "
         "be withheld from users by editing a single list (Chapter 7).",
     ])

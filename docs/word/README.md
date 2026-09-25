@@ -30,7 +30,7 @@ table of contents and page numbers fill in.
 ## Status
 
 - The specifications describe the code in this repository, including the
-  translucent re-rendering, the hidden Korean UI, the large screen-relative
+  translucent re-rendering, the hidden Korean UI, the compact screen-relative
   controls and the collapsible side menu.
 - The test cases have **not been executed**, so their Result fields are blank.
 - The dissertation contains **no measured results**. Every result cell is a

@@ -11,7 +11,8 @@ For each directed pair this writes::
         encoder.int8.onnx     quantised encoder
         decoder.int8.onnx     quantised decoder, cacheless variant
         source.spm.tsv        piece <TAB> log-probability
-        vocab.tsv             token  <TAB> id
+        vocab.tsv             token  <TAB> id   (target vocabulary; decodes output)
+        source_vocab.tsv      token  <TAB> id   (only for separate-vocabulary models)
         config.json           special token ids and decode limits
 
 The two TSVs exist so the app does not have to parse SentencePiece protobuf or
@@ -36,6 +37,8 @@ from pathlib import Path
 # resolve; substituting a different checkpoint is fine as long as it is a Marian
 # model, since everything below is driven by the tokenizer and config it ships.
 PAIRS = {
+    # Exported through the corrected copy built by mt_train/fix_en_ko_base.py:
+    # the published tokenizer maps English through the Korean vocabulary.
     ("en", "ko"): "Helsinki-NLP/opus-mt-tc-big-en-ko",
     ("ko", "en"): "Helsinki-NLP/opus-mt-ko-en",
     ("en", "ja"): "Helsinki-NLP/opus-mt-en-jap",
@@ -62,6 +65,7 @@ def export_pair(repo: str, src: str, tgt: str, out_root: Path, work_root: Path,
     # The tokenizer must be saved explicitly: save_pretrained on the ORT model
     # writes only the graphs and config, so source.spm would otherwise never
     # land in the work directory for write_spm_table to read.
+    repo = resolve_repo(repo)
     tokenizer = AutoTokenizer.from_pretrained(repo)
     tokenizer.save_pretrained(work_dir)
 
@@ -94,7 +98,7 @@ def export_pair(repo: str, src: str, tgt: str, out_root: Path, work_root: Path,
     config = AutoConfig.from_pretrained(repo)
 
     write_spm_table(work_dir, out_dir / "source.spm.tsv")
-    write_vocab(tokenizer, out_dir / "vocab.tsv")
+    write_vocab(tokenizer, out_dir)
     write_config(tokenizer, config, src, tgt, out_dir / "config.json")
 
     # Each pair leaves roughly 750 MB of full-precision and pre-quantisation
@@ -130,14 +134,41 @@ def write_spm_table(work_dir: Path, target: Path) -> None:
     print(f"    source.spm.tsv: {sp.get_piece_size()} pieces")
 
 
-def write_vocab(tokenizer, target: Path) -> None:
-    vocab = tokenizer.get_vocab()
+def resolve_repo(repo: str) -> str:
+    """Swaps in locally corrected checkpoints where the published one is broken."""
+    if repo == "Helsinki-NLP/opus-mt-tc-big-en-ko":
+        sys.path.insert(0, str(Path(__file__).resolve().parent / "mt_train"))
+        import fix_en_ko_base
+        return str(fix_en_ko_base.ensure())
+    return repo
+
+
+def write_vocab(tokenizer, out_dir: Path) -> None:
+    """Writes vocab.tsv, plus source_vocab.tsv for models with separate vocabularies.
+
+    vocab.tsv is what the app decodes output ids with, so it must be the
+    *target* vocabulary. For joint-vocabulary models (most OPUS-MT releases)
+    that is the only table and it also serves the source side. Models trained
+    with separate vocabularies (e.g. the tc-big en-ko "sepvoc" release) get a
+    second table, source_vocab.tsv, which MtVocab uses to encode the input.
+    """
+    separate = bool(getattr(tokenizer, "separate_vocabs", False))
+    target_vocab = tokenizer.target_encoder if separate else tokenizer.get_vocab()
+    _write_table(target_vocab, out_dir / "vocab.tsv")
+    source_path = out_dir / "source_vocab.tsv"
+    if separate:
+        _write_table(tokenizer.encoder, source_path)
+    elif source_path.exists():
+        source_path.unlink()          # stale table from an earlier separate-vocab export
+
+
+def _write_table(vocab: dict, target: Path) -> None:
     with target.open("w", encoding="utf-8", newline="\n") as fh:
         for token, index in sorted(vocab.items(), key=lambda kv: kv[1]):
             if "\t" in token or "\n" in token:
                 sys.exit(f"token {token!r} contains a delimiter; TSV format is unsafe here")
             fh.write(f"{token}\t{index}\n")
-    print(f"    vocab.tsv: {len(vocab)} tokens")
+    print(f"    {target.name}: {len(vocab)} tokens")
 
 
 def write_config(tokenizer, config, src: str, tgt: str, target: Path) -> None:

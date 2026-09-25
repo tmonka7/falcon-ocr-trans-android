@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    A home-screen action card: icon, title, one-line explanation.
-    The host gives it a weighted height, so it grows to share the screen with
-    the other tiles; minHeight keeps it a generous target on short screens.
+    A home-screen action card: icon, title, one-line explanation, sized from
+    the compact tile_* tokens.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/tile_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_vertical"
     android:minHeight="@dimen/tile_min_height"
-    android:padding="18dp"
+    android:padding="@dimen/tile_padding"
     android:background="@drawable/bg_tile_red"
     android:clickable="true"
     android:focusable="true">
@@ -30,7 +29,7 @@
         android:id="@+id/tile_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="7dp"
         android:textColor="@color/text_primary"
         android:textSize="@dimen/tile_title"
         android:textStyle="bold"
@@ -40,7 +39,7 @@
         android:id="@+id/tile_subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="2dp"
         android:alpha="0.85"
         android:textColor="@color/text_primary"
         android:textSize="@dimen/tile_subtitle"
