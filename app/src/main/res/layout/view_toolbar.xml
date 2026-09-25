@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shared top bar. Hosts set the title and optionally show the trailing action. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/toolbar_height"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="@color/bg_surface"
+    android:elevation="2dp">
+
+    <ImageButton
+        android:id="@+id/toolbar_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/ic_back"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/action_back"
+        app:tint="@color/text_primary"
+        xmlns:app="http://schemas.android.com/apk/res-auto"/>
+
+    <TextView
+        android:id="@+id/toolbar_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="4dp"
+        android:textAppearance="@style/TextAppearance.Falcon.Title"
+        tools:text="Translation Result"
+        xmlns:tools="http://schemas.android.com/tools"/>
+
+    <ImageButton
+        android:id="@+id/toolbar_action"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="4dp"
+        android:visibility="gone"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@null"
+        app:tint="@color/text_primary"
+        xmlns:app="http://schemas.android.com/apk/res-auto"/>
+</LinearLayout>

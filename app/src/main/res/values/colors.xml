@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Surfaces, darkest to lightest. -->
+    <color name="bg_base">#070A12</color>
+    <color name="bg_surface">#101726</color>
+    <color name="bg_surface_high">#18202F</color>
+    <color name="bg_elevated">#1E2838</color>
+    <color name="divider">#26314A</color>
+
+    <!-- Brand. -->
+    <color name="brand_red">#E02020</color>
+    <color name="brand_red_dark">#A81515</color>
+    <color name="brand_red_soft">#33E02020</color>
+
+    <!-- Action card accents, matching the home screen tiles. -->
+    <color name="tile_red">#DC2626</color>
+    <color name="tile_blue">#1D6FE0</color>
+    <color name="tile_green">#10A45B</color>
+    <color name="tile_orange">#E8880C</color>
+
+    <!-- Text. -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#9BA6BD</color>
+    <color name="text_tertiary">#66738C</color>
+    <color name="text_on_accent">#FFFFFF</color>
+
+    <!-- Status. -->
+    <color name="status_ok">#10A45B</color>
+    <color name="status_warn">#E8880C</color>
+    <color name="status_error">#E02020</color>
+
+    <color name="scrim">#B3000000</color>
+    <color name="transparent">#00000000</color>
+
+</resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="112dp"
+    android:layout_margin="4dp"
+    android:clickable="true"
+    android:focusable="true">
+
+    <ImageView
+        android:id="@+id/import_thumb"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:background="@color/bg_surface_high"
+        android:contentDescription="@null"/>
+
+    <!-- Selection state: a brand-coloured frame plus a check badge. -->
+    <View
+        android:id="@+id/import_selection_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_selection_frame"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/import_check"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="6dp"
+        android:padding="3dp"
+        android:background="@drawable/bg_check_badge"
+        android:src="@drawable/ic_check"
+        android:contentDescription="@null"
+        android:visibility="gone"
+        app:tint="@color/text_primary"/>
+</FrameLayout>

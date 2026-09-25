@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_base">
+
+    <!-- Title bar with the brand mark, matching the home mock. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/toolbar_height"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/bg_surface"
+        android:paddingStart="12dp"
+        android:paddingEnd="4dp">
+
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@mipmap/ic_launcher"
+            android:contentDescription="@null"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:text="@string/app_name"
+            android:textAppearance="@style/TextAppearance.Falcon.Title"/>
+
+        <ImageButton
+            android:id="@+id/main_models_status"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/ic_info"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/settings_models"
+            app:tint="@color/text_secondary"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <!-- Vertical navigation rail. -->
+        <LinearLayout
+            android:layout_width="@dimen/nav_rail_width"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@color/bg_surface"
+            android:paddingTop="8dp">
+
+            <include android:id="@+id/nav_home" layout="@layout/item_nav" />
+            <include android:id="@+id/nav_image" layout="@layout/item_nav" />
+            <include android:id="@+id/nav_pdf" layout="@layout/item_nav" />
+            <include android:id="@+id/nav_history" layout="@layout/item_nav" />
+            <include android:id="@+id/nav_settings" layout="@layout/item_nav" />
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/gutter">
+
+                <!-- Hero banner -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="118dp"
+                    android:orientation="vertical"
+                    android:gravity="bottom"
+                    android:background="@drawable/bg_banner"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/home_banner_title"
+                        android:textColor="@color/text_primary"
+                        android:textSize="19sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/home_banner_subtitle"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"/>
+                </LinearLayout>
+
+                <!-- Action tiles, two per row. -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/gutter"
+                    android:orientation="horizontal">
+
+                    <include
+                        android:id="@+id/tile_image"
+                        layout="@layout/item_action_tile"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"/>
+
+                    <Space
+                        android:layout_width="@dimen/gutter_small"
+                        android:layout_height="1dp"/>
+
+                    <include
+                        android:id="@+id/tile_pdf"
+                        layout="@layout/item_action_tile"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/gutter_small"
+                    android:orientation="horizontal">
+
+                    <include
+                        android:id="@+id/tile_sequence"
+                        layout="@layout/item_action_tile"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"/>
+
+                    <Space
+                        android:layout_width="@dimen/gutter_small"
+                        android:layout_height="1dp"/>
+
+                    <include
+                        android:id="@+id/tile_history"
+                        layout="@layout/item_action_tile"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"/>
+                </LinearLayout>
+
+                <!-- Language pair selector -->
+                <include
+                    android:id="@+id/language_bar"
+                    layout="@layout/view_language_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/gutter"/>
+
+                <Button
+                    android:id="@+id/main_manual_translate"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/title_translate"
+                    android:textColor="@color/text_secondary"/>
+
+                <TextView
+                    android:id="@+id/main_model_warning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:padding="12dp"
+                    android:background="@drawable/bg_surface_card"
+                    android:textColor="@color/status_warn"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    tools:text="@string/error_models_missing"
+                    tools:visibility="visible"/>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</LinearLayout>

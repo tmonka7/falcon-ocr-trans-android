@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_base">
+
+    <include layout="@layout/view_toolbar"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/gutter">
+
+            <!-- Chosen file card. Tapping anywhere but the clear button repicks. -->
+            <LinearLayout
+                android:id="@+id/pdf_file_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="72dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="12dp"
+                android:background="@drawable/bg_surface_card"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:padding="8dp"
+                    android:background="@drawable/bg_tile_red"
+                    android:src="@drawable/ic_pdf"
+                    android:contentDescription="@null"
+                    app:tint="@color/text_primary"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/pdf_file_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="middle"
+                        android:maxLines="1"
+                        android:text="@string/pdf_choose"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp"/>
+
+                    <TextView
+                        android:id="@+id/pdf_file_meta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        android:visibility="gone"
+                        tools:text="2.4 MB - 12 pages"
+                        tools:visibility="visible"/>
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/pdf_file_clear"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_close"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/action_cancel"
+                    android:visibility="gone"
+                    app:tint="@color/text_tertiary"/>
+            </LinearLayout>
+
+            <include
+                android:id="@+id/pdf_row_range"
+                layout="@layout/item_option_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/gutter_small"/>
+
+            <include
+                android:id="@+id/pdf_row_format"
+                layout="@layout/item_option_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"/>
+
+            <include
+                android:id="@+id/pdf_language_bar"
+                layout="@layout/view_language_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/gutter_small"/>
+
+            <Button
+                android:id="@+id/pdf_start"
+                style="@style/Widget.Falcon.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/gutter"
+                android:text="@string/pdf_start"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:text="@string/pdf_supported"
+                android:textColor="@color/text_tertiary"
+                android:textSize="11sp"/>
+
+            <TextView
+                android:id="@+id/pdf_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/gutter"
+                android:padding="12dp"
+                android:background="@drawable/bg_surface_card"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:textIsSelectable="true"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <include
+        android:id="@+id/pdf_busy"
+        layout="@layout/view_busy"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

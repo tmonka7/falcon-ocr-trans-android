@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- "A" and a CJK glyph side by side: the app translates between scripts. -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M34,68 L41,68 L44,60 L56,60 L59,68 L66,68 L52,34 L48,34 Z M46,54 L50,43 L54,54 Z"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M68,38 h22 v5 h-22 z"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M76,43 h6 v27 h-6 z"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M68,54 h22 v5 h-22 z"/>
+</vector>

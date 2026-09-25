@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="gutter">16dp</dimen>
+    <dimen name="gutter_small">12dp</dimen>
+    <dimen name="card_radius">14dp</dimen>
+    <dimen name="nav_rail_width">64dp</dimen>
+    <dimen name="toolbar_height">56dp</dimen>
+    <dimen name="shutter_size">72dp</dimen>
+    <dimen name="flag_size">26dp</dimen>
+</resources>

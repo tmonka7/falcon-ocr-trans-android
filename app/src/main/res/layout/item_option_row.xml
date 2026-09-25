@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    A settings-style row: optional leading icon, label, current value, chevron.
+    Reused by the PDF options and the whole Settings screen.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/option_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="56dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp"
+    android:background="@drawable/bg_surface_card"
+    android:clickable="true"
+    android:focusable="true">
+
+    <ImageView
+        android:id="@+id/option_icon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="@null"
+        android:visibility="gone"
+        app:tint="@color/text_secondary"
+        tools:src="@drawable/ic_settings"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/option_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textColor="@color/text_primary"
+        android:textSize="15sp"
+        tools:text="Output Format"/>
+
+    <TextView
+        android:id="@+id/option_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        tools:text="DOCX"/>
+
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/option_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/option_chevron"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginStart="6dp"
+        android:src="@drawable/ic_chevron"
+        android:contentDescription="@null"
+        app:tint="@color/text_tertiary"/>
+</LinearLayout>

@@ -1,0 +1,17 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+*/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Model weights are ~230 MB and are reproducible from tools/fetch_models.sh.
+# The README stays tracked so the expected layout is documented in-tree.
+/app/src/main/assets/model/**
+!/app/src/main/assets/model/
+!/app/src/main/assets/model/README.md

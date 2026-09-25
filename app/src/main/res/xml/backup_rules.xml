@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Preferences and history are worth restoring; cached page renders are not. -->
+<full-backup-content>
+    <include domain="sharedpref" path="falcon_ocr_prefs.xml"/>
+    <include domain="database" path="history.db"/>
+    <exclude domain="file" path="pages/"/>
+    <exclude domain="file" path="exports/"/>
+</full-backup-content>

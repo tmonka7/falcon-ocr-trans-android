@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_base">
+
+    <include layout="@layout/view_toolbar"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- The repainted page. The toggle button swaps back to the original. -->
+        <ImageView
+            android:id="@+id/result_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:background="@android:color/black"
+            android:contentDescription="@string/title_result"/>
+
+        <TextView
+            android:id="@+id/result_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/result_no_text"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/result_mode_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_margin="12dp"
+            android:background="@drawable/bg_pill_accent"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:textColor="@color/text_primary"
+            android:textSize="11sp"
+            tools:text="EN to ZH"/>
+    </FrameLayout>
+
+    <!-- Recognised and translated text; the translation stays editable. -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/bg_surface"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/gutter">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lang_source"
+                android:textAppearance="@style/TextAppearance.Falcon.SectionHeader"/>
+
+            <TextView
+                android:id="@+id/result_source_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:padding="12dp"
+                android:background="@drawable/bg_surface_high"
+                android:textIsSelectable="true"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                tools:text="Welcome"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/gutter"
+                android:text="@string/lang_target"
+                android:textAppearance="@style/TextAppearance.Falcon.SectionHeader"/>
+
+            <EditText
+                android:id="@+id/result_translated_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:padding="12dp"
+                android:background="@drawable/bg_surface_high"
+                android:gravity="top|start"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:importantForAutofill="no"
+                android:hint="@string/translate_hint"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/bg_surface"
+        android:padding="@dimen/gutter_small">
+
+        <Button
+            android:id="@+id/result_speak"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/result_speak"
+            app:icon="@drawable/ic_speak"/>
+
+        <Space android:layout_width="8dp" android:layout_height="1dp"/>
+
+        <Button
+            android:id="@+id/result_toggle"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/result_show_original"
+            app:icon="@drawable/ic_edit"/>
+
+        <Space android:layout_width="8dp" android:layout_height="1dp"/>
+
+        <Button
+            android:id="@+id/result_save"
+            style="@style/Widget.Falcon.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/result_save"
+            app:icon="@drawable/ic_save"/>
+    </LinearLayout>
+
+    <include
+        android:id="@+id/result_busy"
+        layout="@layout/view_busy"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

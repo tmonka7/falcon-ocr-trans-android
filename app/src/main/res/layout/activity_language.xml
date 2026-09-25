@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_base">
+
+    <include layout="@layout/view_toolbar"/>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/language_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/bg_surface"
+        app:tabIndicatorColor="@color/brand_red"
+        app:tabSelectedTextColor="@color/brand_red"
+        app:tabTextColor="@color/text_secondary"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_margin="@dimen/gutter"
+        android:background="@drawable/bg_search_field"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_search"
+            android:contentDescription="@null"
+            app:tint="@color/text_tertiary"/>
+
+        <EditText
+            android:id="@+id/language_search"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginStart="8dp"
+            android:background="@null"
+            android:hint="@string/lang_search_hint"
+            android:inputType="text"
+            android:maxLines="1"
+            android:importantForAutofill="no"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"/>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/language_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingStart="@dimen/gutter"
+        android:paddingEnd="@dimen/gutter"
+        android:clipToPadding="false"/>
+</LinearLayout>
