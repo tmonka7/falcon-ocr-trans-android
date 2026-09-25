@@ -9,7 +9,7 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="@drawable/bg_surface_card"
-    android:padding="8dp">
+    android:padding="10dp">
 
     <LinearLayout
         android:id="@+id/language_source"
@@ -27,7 +27,7 @@
             android:id="@+id/language_source_flag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textSize="22sp"
             tools:text="🇬🇧"/>
 
         <TextView
@@ -39,7 +39,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/text_primary"
-            android:textSize="14sp"
+            android:textSize="17sp"
             tools:text="English"/>
 
         <ImageView
@@ -52,8 +52,8 @@
 
     <ImageButton
         android:id="@+id/language_swap"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/icon_button_small"
+        android:layout_height="@dimen/icon_button_small"
         android:src="@drawable/ic_swap"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/lang_swap"
@@ -75,7 +75,7 @@
             android:id="@+id/language_target_flag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textSize="22sp"
             tools:text="🇨🇳"/>
 
         <TextView
@@ -87,7 +87,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/text_primary"
-            android:textSize="14sp"
+            android:textSize="17sp"
             tools:text="Chinese"/>
 
         <ImageView

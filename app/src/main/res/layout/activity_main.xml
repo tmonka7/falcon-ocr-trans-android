@@ -33,52 +33,57 @@
 
         <ImageButton
             android:id="@+id/main_models_status"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
+            android:layout_width="@dimen/icon_button"
+            android:layout_height="@dimen/icon_button"
             android:src="@drawable/ic_info"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/settings_models"
             app:tint="@color/text_secondary"/>
+
+        <!-- Right-hand button that expands and collapses the side menu. -->
+        <ImageButton
+            android:id="@+id/main_nav_toggle"
+            android:layout_width="@dimen/icon_button"
+            android:layout_height="@dimen/icon_button"
+            android:src="@drawable/ic_menu"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/nav_expand"
+            app:tint="@color/text_primary"/>
     </LinearLayout>
 
-    <LinearLayout
+    <!--
+        Content and side menu share a FrameLayout. The content always leaves room
+        for the collapsed rail (marginStart = nav_rail_width), so collapsed icons
+        never cover a tile. Expanded, the menu widens OVER the content behind a
+        scrim instead of pushing it: pushing would squeeze the tiles to a sliver
+        on a phone, defeating the large-button layout.
+    -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
-
-        <!-- Vertical navigation rail. -->
-        <LinearLayout
-            android:layout_width="@dimen/nav_rail_width"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:background="@color/bg_surface"
-            android:paddingTop="8dp">
-
-            <include android:id="@+id/nav_home" layout="@layout/item_nav" />
-            <include android:id="@+id/nav_image" layout="@layout/item_nav" />
-            <include android:id="@+id/nav_pdf" layout="@layout/item_nav" />
-            <include android:id="@+id/nav_history" layout="@layout/item_nav" />
-            <include android:id="@+id/nav_settings" layout="@layout/item_nav" />
-        </LinearLayout>
+        android:layout_weight="1">
 
         <ScrollView
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_marginStart="@dimen/nav_rail_width"
             android:fillViewport="true"
             android:scrollbars="none">
 
+            <!-- match_parent + fillViewport: the column is at least the screen's
+                 height, so the weighted tile rows below share whatever is left
+                 and the buttons scale with the screen. On short screens the
+                 tiles' minHeight wins and the column scrolls instead. -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:padding="@dimen/gutter">
 
                 <!-- Hero banner -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="118dp"
+                    android:layout_height="@dimen/banner_height"
                     android:orientation="vertical"
                     android:gravity="bottom"
                     android:background="@drawable/bg_banner"
@@ -89,7 +94,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/home_banner_title"
                         android:textColor="@color/text_primary"
-                        android:textSize="19sp"
+                        android:textSize="22sp"
                         android:textStyle="bold"/>
 
                     <TextView
@@ -98,13 +103,14 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/home_banner_subtitle"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp"/>
+                        android:textSize="14sp"/>
                 </LinearLayout>
 
-                <!-- Action tiles, two per row. -->
+                <!-- Action tiles, two per row; each row takes half the spare height. -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:layout_marginTop="@dimen/gutter"
                     android:orientation="horizontal">
 
@@ -112,7 +118,7 @@
                         android:id="@+id/tile_image"
                         layout="@layout/item_action_tile"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"/>
 
                     <Space
@@ -123,13 +129,14 @@
                         android:id="@+id/tile_pdf"
                         layout="@layout/item_action_tile"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"/>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:layout_marginTop="@dimen/gutter_small"
                     android:orientation="horizontal">
 
@@ -137,7 +144,7 @@
                         android:id="@+id/tile_sequence"
                         layout="@layout/item_action_tile"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"/>
 
                     <Space
@@ -148,7 +155,7 @@
                         android:id="@+id/tile_history"
                         layout="@layout/item_action_tile"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"/>
                 </LinearLayout>
 
@@ -162,12 +169,11 @@
 
                 <Button
                     android:id="@+id/main_manual_translate"
-                    style="@style/Widget.Material3.Button.TextButton"
+                    style="@style/Widget.Falcon.Button.Outlined"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/title_translate"
-                    android:textColor="@color/text_secondary"/>
+                    android:layout_marginTop="@dimen/gutter_small"
+                    android:text="@string/title_translate"/>
 
                 <TextView
                     android:id="@+id/main_model_warning"
@@ -183,5 +189,34 @@
                     tools:visibility="visible"/>
             </LinearLayout>
         </ScrollView>
-    </LinearLayout>
+
+        <!-- Dims the content while the menu is expanded; tapping it collapses. -->
+        <View
+            android:id="@+id/nav_scrim"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/scrim"
+            android:clickable="true"
+            android:focusable="false"
+            android:importantForAccessibility="no"
+            android:visibility="gone"/>
+
+        <!-- Side menu. Its width is animated between nav_rail_width (icons only)
+             and nav_rail_expanded_width (icons and labels) by MainActivity. -->
+        <LinearLayout
+            android:id="@+id/nav_rail"
+            android:layout_width="@dimen/nav_rail_width"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@color/bg_surface"
+            android:elevation="8dp"
+            android:paddingTop="8dp">
+
+            <include android:id="@+id/nav_home" layout="@layout/item_nav" />
+            <include android:id="@+id/nav_image" layout="@layout/item_nav" />
+            <include android:id="@+id/nav_pdf" layout="@layout/item_nav" />
+            <include android:id="@+id/nav_history" layout="@layout/item_nav" />
+            <include android:id="@+id/nav_settings" layout="@layout/item_nav" />
+        </LinearLayout>
+    </FrameLayout>
 </LinearLayout>

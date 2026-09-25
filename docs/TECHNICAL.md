@@ -81,6 +81,40 @@ All processing happens on the device. No image or text leaves it.
 - **PDF:** pages are rasterised, processed and released one at a time. At
   200 dpi, one A4 page is ≈23 MB as ARGB_8888.
 
+### 2.4 User interface sizing and the side menu
+
+- **Screen-relative controls.** Every control size is a dimension token.
+  `res/values/dimens.xml` holds the phone values and
+  `res/values-sw600dp/dimens.xml` the tablet values, so all controls grow with
+  the screen class. The main tokens are:
+
+  | Token | Phone | Tablet |
+  |---|---|---|
+  | `button_height` | 60 dp | 72 dp |
+  | `icon_button` | 56 dp | 64 dp |
+  | `icon_button_small` | 48 dp | 56 dp |
+  | `shutter_size` | 88 dp | 108 dp |
+  | `row_min_height` | 64 dp | 76 dp |
+
+  The `Widget.Falcon.Button.*` styles read these tokens.
+- **Home tiles fill the screen.** The home column is `match_parent` inside a
+  `ScrollView` with `fillViewport`, and both tile rows have weight 1. The
+  tiles therefore share whatever height is left. On short or landscape
+  screens, `tile_min_height` (140 / 200 dp) wins and the column scrolls.
+- **Collapsible side menu** (`MainActivity.bindNavToggle` / `applyNavState`):
+  - Collapsed, it is an icon rail (`nav_rail_width`, 80 / 104 dp). The content
+    reserves that width with `marginStart`, so the rail never covers a tile.
+  - The right-hand title-bar button `main_nav_toggle` animates the rail to
+    `nav_rail_expanded_width` (208 / 280 dp) over the content, fades in a
+    scrim (`nav_scrim`) and fades the labels in. The animation takes 220 ms.
+  - The toggle, a tap on the scrim, or Back collapses it. Back is handled by
+    an `OnBackPressedCallback` that is enabled only while the menu is expanded.
+  - The menu overlays the content rather than pushing it: pushing would leave
+    about 50 dp per tile on a 360 dp phone. For the same reason it always
+    starts collapsed, and its state is not saved.
+  - Every menu item carries its label as content description. Collapsed items
+    also carry it as a tooltip.
+
 ---
 
 ## 3. Pipeline, stage by stage

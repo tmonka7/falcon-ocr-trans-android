@@ -1,26 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One destination in the navigation rail. -->
+<!--
+    One destination in the side menu. The icon keeps a fixed slot on the left so
+    it does not move while the menu animates; the label is revealed when the
+    menu is expanded and hidden when it is collapsed (see MainActivity).
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_root"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
-    android:layout_marginStart="6dp"
-    android:layout_marginEnd="6dp"
-    android:layout_marginBottom="4dp"
+    android:layout_height="@dimen/nav_item_height"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="6dp"
+    android:paddingStart="@dimen/nav_item_padding_start"
+    android:paddingEnd="12dp"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true">
 
     <ImageView
         android:id="@+id/nav_icon"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
+        android:layout_width="@dimen/nav_icon"
+        android:layout_height="@dimen/nav_icon"
         android:contentDescription="@null"
         app:tint="@color/text_secondary"
         tools:src="@drawable/ic_home"/>
@@ -29,8 +33,13 @@
         android:id="@+id/nav_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginStart="16dp"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:textColor="@color/text_secondary"
-        android:textSize="10sp"
+        android:textSize="@dimen/nav_label"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:visibility="visible"
         tools:text="Home"/>
 </LinearLayout>

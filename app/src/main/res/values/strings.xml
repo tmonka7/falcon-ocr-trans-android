@@ -21,6 +21,8 @@
     <string name="nav_pdf">PDF</string>
     <string name="nav_history">History</string>
     <string name="nav_settings">Settings</string>
+    <string name="nav_expand">Expand menu</string>
+    <string name="nav_collapse">Collapse menu</string>
 
     <!-- Screen titles -->
     <string name="title_camera">Camera OCR</string>

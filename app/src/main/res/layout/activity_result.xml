@@ -115,7 +115,7 @@
 
         <Button
             android:id="@+id/result_speak"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/Widget.Falcon.Button.Tonal"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -126,7 +126,7 @@
 
         <Button
             android:id="@+id/result_toggle"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/Widget.Falcon.Button.Tonal"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

@@ -74,8 +74,8 @@
 
                 <ImageButton
                     android:id="@+id/pdf_file_clear"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
+                    android:layout_width="@dimen/icon_button_small"
+                    android:layout_height="@dimen/icon_button_small"
                     android:src="@drawable/ic_close"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/action_cancel"

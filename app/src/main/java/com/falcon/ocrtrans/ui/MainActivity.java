@@ -1,26 +1,49 @@
 package com.falcon.ocrtrans.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
 
 import com.falcon.ocrtrans.R;
 import com.falcon.ocrtrans.data.Prefs;
 import com.falcon.ocrtrans.engine.ModelValidator;
 
-/** Home: the action tiles, the language pair, and the navigation rail. */
+/** Home: the action tiles, the language pair, and the collapsible side menu. */
 public final class MainActivity extends BaseActivity {
+
+    /** Side-menu width animation length; the system animator scale still applies. */
+    private static final long NAV_ANIMATION_MS = 220;
+
+    private static final int[] NAV_ITEM_IDS = {
+            R.id.nav_home, R.id.nav_image, R.id.nav_pdf, R.id.nav_history, R.id.nav_settings,
+    };
 
     private Prefs prefs;
     private LanguageBar languageBar;
+
+    private View navRail;
+    private View navScrim;
+    private ImageButton navToggle;
+    private boolean navExpanded;
+    private OnBackPressedCallback navBackCallback;
+    @Nullable
+    private ValueAnimator navAnimator;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -30,6 +53,7 @@ public final class MainActivity extends BaseActivity {
         prefs = new Prefs(this);
 
         bindNavRail();
+        bindNavToggle();
         bindTiles();
 
         languageBar = new LanguageBar(this, findViewById(R.id.language_bar), prefs,
@@ -58,6 +82,128 @@ public final class MainActivity extends BaseActivity {
                 v -> startActivity(new Intent(this, HistoryActivity.class)));
         bindNavItem(R.id.nav_settings, R.drawable.ic_settings, R.string.nav_settings, false,
                 v -> startActivity(new Intent(this, SettingsActivity.class)));
+    }
+
+    // ----------------------------------------------------------- side menu
+
+    /**
+     * Wires the right-hand title-bar button that expands and collapses the side
+     * menu.
+     *
+     * <p>Collapsed, the menu is a narrow rail of icons that the content always
+     * leaves room for. Expanded, it widens over the content, adds a label to each
+     * icon and dims the rest of the screen; tapping the dimmed area or pressing
+     * Back collapses it again. It overlays rather than pushes because pushing
+     * would squeeze the home tiles to a sliver on a phone. For the same reason
+     * the menu always starts collapsed instead of restoring its last state.
+     */
+    private void bindNavToggle() {
+        navRail = findViewById(R.id.nav_rail);
+        navScrim = findViewById(R.id.nav_scrim);
+        navToggle = findViewById(R.id.main_nav_toggle);
+
+        navBackCallback = new OnBackPressedCallback(false) {
+            @Override
+            public void handleOnBackPressed() {
+                setNavExpanded(false);
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, navBackCallback);
+
+        navToggle.setOnClickListener(v -> setNavExpanded(!navExpanded));
+        navScrim.setOnClickListener(v -> setNavExpanded(false));
+        applyNavState(false);
+    }
+
+    private void setNavExpanded(boolean expanded) {
+        if (expanded == navExpanded) {
+            return;
+        }
+        navExpanded = expanded;
+        applyNavState(true);
+    }
+
+    private void applyNavState(boolean animate) {
+        int collapsed = getResources().getDimensionPixelSize(R.dimen.nav_rail_width);
+        int expanded = getResources().getDimensionPixelSize(R.dimen.nav_rail_expanded_width);
+        int target = navExpanded ? expanded : collapsed;
+
+        navBackCallback.setEnabled(navExpanded);
+        navToggle.setImageResource(navExpanded ? R.drawable.ic_menu_open : R.drawable.ic_menu);
+        navToggle.setContentDescription(getString(
+                navExpanded ? R.string.nav_collapse : R.string.nav_expand));
+
+        for (int id : NAV_ITEM_IDS) {
+            View root = findViewById(id);
+            TextView label = root.findViewById(R.id.nav_label);
+            // With labels hidden the icon alone must still say where it goes.
+            ViewCompat.setTooltipText(root, navExpanded ? null : label.getText());
+            root.setContentDescription(label.getText());
+        }
+
+        if (navAnimator != null) {
+            navAnimator.cancel();
+            navAnimator = null;
+        }
+        if (!animate) {
+            setNavWidth(target);
+            setNavLabelsVisible(navExpanded, 1f);
+            navScrim.setVisibility(navExpanded ? View.VISIBLE : View.GONE);
+            navScrim.setAlpha(1f);
+            return;
+        }
+
+        // Labels appear once there is room for them and leave before the rail
+        // narrows, so they are never squeezed into an ellipsis mid-animation.
+        if (!navExpanded) {
+            setNavLabelsVisible(false, 1f);
+        }
+        navScrim.setVisibility(View.VISIBLE);
+        int start = navRail.getWidth() > 0 ? navRail.getWidth() : (navExpanded ? collapsed : expanded);
+        ValueAnimator animator = ValueAnimator.ofInt(start, target);
+        animator.setDuration(NAV_ANIMATION_MS);
+        animator.setInterpolator(new DecelerateInterpolator());
+        animator.addUpdateListener(a -> {
+            int width = (int) a.getAnimatedValue();
+            setNavWidth(width);
+            float progress = (float) (width - collapsed) / Math.max(1, expanded - collapsed);
+            navScrim.setAlpha(Math.max(0f, Math.min(1f, progress)));
+            if (navExpanded) {
+                setNavLabelsVisible(progress > 0.6f, Math.max(0f, (progress - 0.6f) / 0.4f));
+            }
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (!navExpanded) {
+                    navScrim.setVisibility(View.GONE);
+                }
+            }
+        });
+        navAnimator = animator;
+        animator.start();
+    }
+
+    private void setNavWidth(int width) {
+        ViewGroup.LayoutParams lp = navRail.getLayoutParams();
+        lp.width = width;
+        navRail.setLayoutParams(lp);
+    }
+
+    private void setNavLabelsVisible(boolean visible, float alpha) {
+        for (int id : NAV_ITEM_IDS) {
+            TextView label = findViewById(id).findViewById(R.id.nav_label);
+            label.setVisibility(visible ? View.VISIBLE : View.GONE);
+            label.setAlpha(alpha);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (navAnimator != null) {
+            navAnimator.cancel();
+        }
+        super.onDestroy();
     }
 
     private void bindNavItem(int rootId,
