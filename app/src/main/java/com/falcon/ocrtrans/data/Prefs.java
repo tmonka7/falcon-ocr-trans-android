@@ -69,7 +69,7 @@ public final class Prefs {
 
     @NonNull
     public Lang sourceLang() {
-        return Lang.fromCodeOr(prefs.getString(KEY_SOURCE, Lang.EN.code()), Lang.EN);
+        return Lang.userFacingOr(prefs.getString(KEY_SOURCE, Lang.EN.code()), Lang.EN);
     }
 
     public void setSourceLang(@NonNull Lang lang) {
@@ -78,7 +78,7 @@ public final class Prefs {
 
     @NonNull
     public Lang targetLang() {
-        return Lang.fromCodeOr(prefs.getString(KEY_TARGET, Lang.ZH.code()), Lang.ZH);
+        return Lang.userFacingOr(prefs.getString(KEY_TARGET, Lang.ZH.code()), Lang.ZH);
     }
 
     public void setTargetLang(@NonNull Lang lang) {

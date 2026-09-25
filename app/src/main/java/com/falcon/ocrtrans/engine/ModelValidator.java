@@ -125,7 +125,10 @@ public final class ModelValidator {
         // lines recognise poorly, but everything else still works.
         Assets.exists(ctx, ModelPaths.CLS_MODEL);
 
-        for (Lang lang : Lang.values()) {
+        // Only user-facing languages are checked. A hidden language's models may
+        // still be bundled, but their absence must not mark the install
+        // incomplete, and their presence must not surface in the model report.
+        for (Lang lang : Lang.userFacing()) {
             boolean ok = require(ctx, ModelPaths.recModel(lang), missing)
                     & require(ctx, ModelPaths.recDict(lang), missing);
             if (det && ok) {
@@ -133,8 +136,8 @@ public final class ModelValidator {
             }
         }
 
-        for (Lang from : Lang.values()) {
-            for (Lang to : Lang.values()) {
+        for (Lang from : Lang.userFacing()) {
+            for (Lang to : Lang.userFacing()) {
                 if (from == to) {
                     continue;
                 }

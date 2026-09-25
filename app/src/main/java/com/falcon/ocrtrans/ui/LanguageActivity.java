@@ -114,7 +114,8 @@ public final class LanguageActivity extends BaseActivity {
         List<Row> rows = new ArrayList<>();
         Lang selected = side == Side.SOURCE ? prefs.sourceLang() : prefs.targetLang();
 
-        for (Lang lang : Lang.values()) {
+        // userFacing(), not values(): implemented-but-hidden languages stay out of the picker.
+        for (Lang lang : Lang.userFacing()) {
             if (!matchesQuery(lang)) {
                 continue;
             }

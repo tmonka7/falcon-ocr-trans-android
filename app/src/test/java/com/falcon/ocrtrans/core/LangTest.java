@@ -1,7 +1,9 @@
 package com.falcon.ocrtrans.core;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -50,5 +52,29 @@ public class LangTest {
     public void pairKeyMatchesModelDirectoryNaming() {
         assertEquals("en-ko", Lang.pairKey(Lang.EN, Lang.KO));
         assertEquals("ja-zh", Lang.pairKey(Lang.JA, Lang.ZH));
+    }
+
+    /**
+     * Korean is implemented but withheld from the interface. It must keep
+     * parsing — stored data and model paths depend on it — while never being
+     * offered, restored from preferences, or listed.
+     */
+    @Test
+    public void koreanIsImplementedButNotUserFacing() {
+        assertEquals(Lang.KO, Lang.fromCode("ko"));
+        assertFalse(Lang.KO.isUserFacing());
+        for (Lang l : Lang.userFacing()) {
+            assertTrue(l != Lang.KO);
+        }
+        assertEquals(Lang.EN, Lang.userFacingOr("ko", Lang.EN));
+    }
+
+    @Test
+    public void userFacingLanguagesSurviveTheFilter() {
+        assertTrue(Lang.EN.isUserFacing());
+        assertTrue(Lang.JA.isUserFacing());
+        assertTrue(Lang.ZH.isUserFacing());
+        assertEquals(Lang.JA, Lang.userFacingOr("jp", Lang.EN));
+        assertEquals(Lang.ZH, Lang.userFacingOr("de", Lang.ZH));
     }
 }

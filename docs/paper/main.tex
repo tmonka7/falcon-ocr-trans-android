@@ -1,0 +1,643 @@
+% ===========================================================================
+%  MANUSCRIPT DRAFT
+%
+%  STATUS: Methods complete. RESULTS PENDING.
+%  Every quantity marked \tbd{} must be measured with the protocol in
+%  Section VI before submission. No experimental number in this draft is a
+%  measurement; placeholders render in red while \drafttrue is set.
+%  Before submission: fill every \tbd, set \draftfalse, and delete the
+%  "Draft status" paragraph at the end of the Introduction.
+% ===========================================================================
+\documentclass[journal]{IEEEtran}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{cite}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+
+\newif\ifdraft
+\drafttrue
+\ifdraft
+  \newcommand{\tbd}[1][--]{\textcolor{red}{#1}}
+  \newcommand{\note}[1]{\textcolor{red}{[#1]}}
+\else
+  \newcommand{\tbd}[1][--]{#1}
+  \newcommand{\note}[1]{}
+\fi
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\begin{document}
+
+\title{Fully Offline, Layout-Preserving Image Translation on Commodity Smartphones:
+A Dependency-Light Pipeline with Translucent Re-Rendering}
+
+\author{%
+  \note{Author names, affiliations, ORCID and corresponding-author e-mail}%
+  \thanks{Manuscript received \note{date}.}%
+}
+
+\markboth{\note{Journal name}, Vol.~XX, No.~X, \note{Month}~2026}%
+{\note{Surname} \MakeLowercase{\textit{et al.}}: Offline Layout-Preserving Image Translation}
+
+\maketitle
+
+% ---------------------------------------------------------------------------
+\begin{abstract}
+Image translation applications recognise text in a photograph or scanned page,
+translate it, and paint the translation back over the original. Most such
+systems send the image to a server, which rules them out for sensitive
+documents and for places without connectivity. We present a complete image
+translation system for Android that runs entirely on the device, needs no
+network permission, and is written in managed Java with no native layer beyond
+the inference runtime. The system chains PP-OCR text detection, orientation
+classification and CTC recognition with OPUS-MT Transformer translation, both
+executed by ONNX Runtime on int8 or float weights. It reimplements
+Differentiable-Binarization post-processing without OpenCV or a polygon
+clipping library: we show that restricting the convex hull to per-row extreme
+pixels is exact, and that the unclip offset has a closed form for rectangles.
+Directions between Chinese, Japanese and Korean are routed through English,
+because no direct models exist for them. For re-rendering we replace the usual
+opaque erase with a translucent, feathered highlight in the locally estimated
+paper colour, combined with a paper-coloured glyph halo. We derive how much
+this reduces the visibility of the original text and of the page texture. We
+evaluate text detection, recognition, translation quality, on-device latency
+and memory, and perceived rendering quality in a user study. On
+\tbd[\ldots]{} \note{summarise the headline measured results here once
+Section~VII is complete}.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Optical character recognition, machine translation, on-device inference,
+scene text, layout preservation, mobile computing, privacy.
+\end{IEEEkeywords}
+
+% ---------------------------------------------------------------------------
+\section{Introduction}
+\IEEEPARstart{C}{amera-based} translation has become a common way to read
+menus, signs, forms and documents in an unfamiliar language. A typical system
+works in three stages: \emph{recognition} (optical character recognition,
+OCR), \emph{translation} (machine translation, MT), and \emph{re-rendering},
+which paints the translated text back into the image in place of the
+original~\cite{mansimov2020inimage}. In widely deployed services the first two
+stages run on a server. That is convenient, but it is unacceptable for several
+growing use cases: medical and legal paperwork, identity documents, corporate
+material under data-residency rules, and travel without a data connection.
+
+Moving the full pipeline onto a phone raises four problems.
+\begin{enumerate}
+  \item \textbf{Resources.} Detection, recognition and a Transformer
+  translator~\cite{vaswani2017attention} must fit together in a mobile heap
+  that the operating system's low-memory killer polices aggressively.
+  \item \textbf{Dependencies.} Reference OCR pipelines depend on OpenCV and on
+  polygon-clipping libraries for post-processing~\cite{paddleocr}. That forces
+  a native (NDK) build per CPU architecture, which increases APK size and
+  maintenance cost.
+  \item \textbf{Language coverage.} Compact open MT models are published for
+  English-centric pairs, but not for pairs among Chinese, Japanese and Korean
+  (CJK)~\cite{tiedemann2020opusmt}.
+  \item \textbf{Re-rendering.} Removing the original text convincingly
+  normally requires an inpainting network~\cite{suvorov2022lama,zhang2019ensnet}.
+  The cheap alternative, filling each text box with a flat colour, leaves
+  visible patches over photographs, gradients and paper texture.
+\end{enumerate}
+
+This paper describes and evaluates a system that addresses all four. Its
+contributions are:
+\begin{itemize}
+  \item \textbf{A dependency-light on-device pipeline.} End-to-end
+  OCR-plus-MT runs in managed code over ONNX Runtime~\cite{onnxruntime}, with
+  no network permission, one engine thread, and bounded model residency
+  (Section~\ref{sec:impl}).
+  \item \textbf{Library-free DB post-processing.} We give an exact reduction
+  of the convex-hull input to per-row extremes (Lemma~\ref{lem:rows}) and a
+  closed-form unclip for rectangles (Eq.~\ref{eq:unclip}). A component-restricted
+  confidence score avoids penalising rotated text (Section~\ref{sec:det}).
+  \item \textbf{Translucent re-rendering.} A feathered paper-colour highlight
+  combined with a glyph halo keeps the page texture and remains legible,
+  without an inpainting model. We analyse its contrast attenuation
+  (Proposition~\ref{prop:contrast}) and pair it with a size-fitting search
+  that respects line breaking (Section~\ref{sec:render}).
+  \item \textbf{Evaluation.} We report detection, recognition, translation
+  (including English-pivoted CJK directions), latency, memory and a user study
+  of rendering variants (Sections~\ref{sec:setup}--\ref{sec:results}).
+\end{itemize}
+
+\ifdraft
+\noindent\textcolor{red}{\textbf{Draft status.} Sections~I--V are complete.
+Sections~VI--VII give the experimental protocol and empty result tables;
+no reported number is yet a measurement.}
+\fi
+
+% ---------------------------------------------------------------------------
+\section{Related Work}
+
+\subsection{Scene and document text recognition}
+Segmentation-based detectors predict a per-pixel text probability map and
+derive polygons from it. Differentiable Binarization (DB)~\cite{liao2020db}
+makes the binarisation threshold learnable during training. At inference it
+uses a fixed threshold, then dilates ("unclips") the shrunk regions it was
+trained to predict, using a Vatti-style polygon offset~\cite{vatti1992clip}.
+Recognition is commonly done by a convolutional-recurrent network trained with
+connectionist temporal classification (CTC)~\cite{shi2017crnn,graves2006ctc}.
+PP-OCR~\cite{du2020ppocr,li2022ppocrv3} packages a DB detector, a text
+orientation classifier and a CTC recogniser into lightweight
+MobileNetV3-based models~\cite{howard2019mobilenetv3} with multilingual
+recognition heads. We use its released weights unchanged and reimplement the
+surrounding algorithmic code.
+
+\subsection{Compact and pivot machine translation}
+OPUS-MT~\cite{tiedemann2020opusmt} provides Marian-trained~\cite{junczys2018marian}
+Transformer models for many language pairs. Most of them are English-centric.
+Pivoting through a third language is a long-standing way to cover missing
+directions~\cite{utiyama2007pivot}; it costs extra latency and compounds
+errors. Massively multilingual models such as NLLB-200~\cite{nllb2022} cover
+direct CJK pairs but are much larger than the per-pair budget of a phone
+application. Post-training integer quantisation~\cite{jacob2018quant} reduces
+model size and latency on CPUs with little loss in quality.
+
+\subsection{Text removal, editing and in-image translation}
+Scene-text erasing networks~\cite{zhang2019ensnet} and general
+inpainting~\cite{telea2004inpaint,suvorov2022lama} remove text before new text
+is drawn. Scene-text editing methods~\cite{wu2019srnet,roy2020stefann} go
+further and synthesise replacement text in the original style. End-to-end
+in-image translation has also been explored~\cite{mansimov2020inimage}. These
+approaches give the most seamless results, but their compute and memory needs
+are high for a pipeline that already holds OCR and MT models. Our renderer
+takes a deliberately analytic route: it neither removes nor imitates the
+original, but attenuates it by a known amount and guarantees legibility
+locally.
+
+% ---------------------------------------------------------------------------
+\section{System Overview}\label{sec:overview}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  node distance=3.2mm,
+  box/.style={draw, rectangle, rounded corners=2pt,
+              text width=0.84\columnwidth, minimum height=6mm,
+              font=\footnotesize, align=center},
+  arr/.style={-{Stealth[length=2mm]}}]
+  \node[box] (in)  {Camera frame, image, or PDF page (200\,dpi)};
+  \node[box, below=of in]  (det) {DB detection $\rightarrow$ probability map $P$
+     $\rightarrow$ components, hull, min-area rectangle, unclip};
+  \node[box, below=of det] (rec) {Perspective crop $\rightarrow$ $180^\circ$
+     classifier $\rightarrow$ CTC recognition; ink/paper colour estimate};
+  \node[box, below=of rec] (lay) {Reading order $\rightarrow$ paragraph grouping
+     $\rightarrow$ script-based source check};
+  \node[box, below=of lay] (mt)  {SentencePiece Viterbi $\rightarrow$ Marian
+     encoder / greedy decoder; CJK$\leftrightarrow$CJK via English};
+  \node[box, below=of mt]  (ren) {Translucent highlight $\rightarrow$ size fitting
+     $\rightarrow$ halo + ink typesetting};
+  \foreach \a/\b in {in/det, det/rec, rec/lay, lay/mt, mt/ren}
+    \draw[arr] (\a) -- (\b);
+\end{tikzpicture}
+\caption{Processing pipeline. All stages run on the device, serialised on one
+worker thread.}
+\label{fig:pipeline}
+\end{figure}
+
+Fig.~\ref{fig:pipeline} shows the pipeline. The input is a bitmap $I$ of size
+$W\times H$, a source language $\ell_s$ and a target language $\ell_t$, drawn
+from $\mathcal{L}=\{\textsc{en},\textsc{ko},\textsc{ja},\textsc{zh}\}$. The
+output is a set of recognised lines, each with an oriented quadrilateral
+$q_i$, a string $x_i$, a confidence $c_i$ and colours $(\kappa_i,\pi_i)$ (ink,
+paper). Lines are grouped into paragraphs $\mathcal{P}_j$, each paragraph gets
+a translation $y_j$, and the system produces a rendered image $\hat I$ in
+which each $y_j$ occupies the geometry of $\mathcal{P}_j$.
+
+% ---------------------------------------------------------------------------
+\section{Method}
+
+\subsection{Text detection post-processing}\label{sec:det}
+The detector input is the page scaled so that its long edge is at most
+$L_{\max}\in\{640,960,1280\}$, a user-selectable quality level, with both sides
+rounded to multiples of $32$ to match the network's five stride-2 stages. The
+network outputs $P\in[0,1]^{h\times w}$.
+
+\paragraph{Components and scoring}
+We binarise at $\tau_b=0.3$ and extract 8-connected components with an
+iterative flood fill. Components smaller than $12$ pixels are discarded.
+Reference implementations score a candidate by averaging $P$ over its
+axis-aligned bounding box. For text at an angle, most of that box is
+background, so rotated lines are penalised systematically. We score over the
+component itself:
+\begin{equation}
+  S(C)=\frac{1}{|C|}\sum_{p\in C}P(p),\qquad \text{keep } C \iff S(C)\ge\tau_s=0.6 .
+\end{equation}
+
+\paragraph{Exact hull reduction}
+Computing the convex hull of a large component (a paragraph can exceed $10^5$
+pixels) dominates the post-processing time. We therefore reduce the point set
+first.
+\begin{lemma}\label{lem:rows}
+Let $C\subset\mathbb{Z}^2$ be finite. Let $R(C)$ contain, for each row $y$ that
+meets $C$, the leftmost and rightmost pixels of $C$ in that row. Then
+$\operatorname{conv}(R(C))=\operatorname{conv}(C)$.
+\end{lemma}
+\begin{proof}
+$R(C)\subseteq C$, so $\operatorname{conv}(R(C))\subseteq\operatorname{conv}(C)$.
+Conversely, every extreme point $v$ of $\operatorname{conv}(C)$ belongs to $C$.
+If $v$ were not a row extreme, there would be points $a,b\in C$ on the same row
+with $a_x<v_x<b_x$. Then $v$ would be a strict convex combination of $a$ and
+$b$, contradicting extremality. So every extreme point lies in $R(C)$, and
+$\operatorname{conv}(C)=\operatorname{conv}(\mathrm{ext})\subseteq
+\operatorname{conv}(R(C))$.
+\end{proof}
+The reduced set has at most $2h_C$ points, where $h_C$ is the height of the
+component. The hull is computed with Andrew's monotone chain~\cite{andrew1979hull}
+in $O(h_C\log h_C)$.
+
+\paragraph{Minimum-area rectangle}
+A minimum-area enclosing rectangle has one side collinear with an edge of the
+convex hull~\cite{freeman1975rect}. We test every hull edge (rotating
+calipers~\cite{toussaint1983calipers}) and keep the rectangle with centre
+$\mathbf{c}$, half-extents $(a,b)$ and unit axis $\mathbf{u}$. The renderer
+needs this oriented rectangle anyway, because $\mathbf{u}$ gives the baseline
+angle directly.
+
+\paragraph{Closed-form unclip}
+DB is trained to predict a region shrunk by the offset
+$D=A(1-r_s^2)/L$~\cite{liao2020db}. At inference the region is dilated by
+$d=A\,r/L$, where $A$ and $L$ are the area and perimeter of the region and
+$r=1.6$. Upstream this is a general polygon offset~\cite{vatti1992clip}. For a
+$w\times h$ rectangle it reduces to
+\begin{equation}\label{eq:unclip}
+  d=\frac{w\,h\,r}{2(w+h)},\qquad (a,b)\leftarrow(a+d,\;b+d),
+\end{equation}
+which needs no clipping library. Rectangles with a side under $3$ pixels are
+rejected. Corners are ordered clockwise from top-left, scaled to page
+coordinates, and clamped to the page.
+
+\subsection{Recognition}\label{sec:rec}
+Each quadrilateral is mapped onto an upright crop by a four-point projective
+transform, which also corrects mild keystone distortion. An orientation
+classifier flips a crop by $180^\circ$ only when
+$p(\text{rotated})>0.9$: an incorrect flip cannot be recovered, while a missed
+one only degrades accuracy. Crops are resized to height $48$, sorted by aspect
+ratio, and batched six at a time. Each batch is right-padded to the batch's
+widest crop, rounded up to a multiple of $8$ and capped at $1200$ pixels.
+Sorting by aspect ratio minimises wasted padding. Greedy CTC
+decoding~\cite{graves2006ctc} takes the arg-max class per time step, collapses
+repeats and removes blanks. Line confidence $c_i$ is the mean of the retained
+maxima, and lines with $c_i<0.5$ are discarded. The recogniser's class count
+is read from the loaded graph and checked against the character dictionary,
+because an off-by-one there produces plausible but wrong text rather than an
+error.
+
+\subsection{Ink and paper estimation}\label{sec:color}
+For each crop, luminance is $Y=0.299R+0.587G+0.114B$, computed on a
+subsampled grid of about $4096$ pixels. Pixels are split at
+$Y_{\mathrm{mid}}=(Y_{\min}+Y_{\max})/2$, and each side is averaged in RGB. The
+side with \emph{fewer} pixels is taken as ink $\kappa_i$ and the other as
+paper $\pi_i$. This handles dark-on-light and light-on-dark text alike and
+costs one pass per line.
+
+\subsection{Layout analysis}\label{sec:layout}
+Lines are sorted top-to-bottom. Two lines count as the same row when their
+vertical centres differ by less than $0.6$ times the smaller height; within a
+row they are ordered left to right. A line $n$ \emph{continues} the paragraph
+of its predecessor $m$ if and only if all of the following hold:
+\begin{equation}
+\begin{aligned}
+ &\tfrac{\max(h_m,h_n)}{\min(h_m,h_n)}\le 1.7,\quad |\theta_m-\theta_n|\le 8^\circ,\\
+ &\mathrm{top}_n-\mathrm{bot}_m\le 1.6\max(h_m,h_n),\quad \mathrm{cy}_n\ge \mathrm{cy}_m,\\
+ &\frac{\mathrm{overlap}_x(m,n)}{\min(w_m,w_n)}\ge 0.25 .
+\end{aligned}
+\end{equation}
+These conditions separate headings from body text (height), columns (overlap
+and centre order) and rotated labels (angle). When paragraph text is
+assembled, a space is inserted at each line wrap unless both neighbouring
+characters are CJK. In CJK text, a space at that position would be a real
+character rather than a line-wrap artefact.
+
+\subsection{Script-based source verification}\label{sec:lid}
+A wrong recognition head produces confident garbage. We therefore check the
+first pass with a script test. Let $n_{\mathrm{hg}},n_{\mathrm{kn}},
+n_{\mathrm{han}},n_{\mathrm{lat}}$ count Hangul, Kana, Han and Latin letters,
+and let $N$ be their sum. Then
+\begin{equation}
+ \hat\ell=\begin{cases}
+ \textsc{ko} & n_{\mathrm{hg}}/N>0.08\\
+ \textsc{ja} & \text{else if } n_{\mathrm{kn}}/N>0.08\\
+ \textsc{zh} & \text{else if } n_{\mathrm{han}}>0,\ n_{\mathrm{han}}\ge n_{\mathrm{lat}}\\
+ \textsc{en} & \text{else if } n_{\mathrm{lat}}>0\\
+ \ell_s & \text{otherwise.}
+ \end{cases}
+\end{equation}
+If $\hat\ell\neq\ell_s$, the page is recognised again with the head for
+$\hat\ell$, and the new result is kept if it is non-empty. The known failure
+mode is Japanese written only in Kanji, which is classified as Chinese.
+
+\subsection{Translation}\label{sec:mt}
+\paragraph{Tokenisation}
+The source SentencePiece unigram model~\cite{kudo2018sentencepiece,kudo2018unigram}
+is exported as a table of piece log-probabilities. Segmentation maximises
+$\sum_k\log p(\text{piece}_k)$ with an exact Viterbi pass over at most
+$\ell_{\max}$ candidate end positions per character, where $\ell_{\max}$ is the
+longest piece. Unknown characters are charged $-10$.
+
+\paragraph{Decoding}
+The encoder runs once per chunk. The decoder is stepped greedily until an
+end-of-sequence token is produced or the length limit
+$\min(n_{\max},\max(16,3m+8))$ is reached, where $m$ is the source length. We
+use the decoder export \emph{without} a key-value cache, so step $t$
+re-processes all $t$ prefix positions, and generating $n$ tokens evaluates
+\begin{equation}
+  \textstyle\sum_{t=1}^{n}t=\frac{n(n+1)}{2}
+\end{equation}
+decoder positions instead of $n$. For OCR-length segments (tens of tokens)
+this overhead is small in absolute terms, and it avoids threading dozens of
+cache tensors through the runtime. Section~\ref{sec:results} measures it.
+Inputs over $192$ source tokens are split at sentence punctuation; a single
+sentence over the limit is kept whole rather than cut mid-clause.
+
+\paragraph{Pivot routing}
+Of the $12$ directed pairs over $\mathcal{L}$, the six English-centric
+directions are served directly, and the six CJK$\leftrightarrow$CJK directions
+are composed as $\ell_s\!\to\!\textsc{en}\!\to\!\ell_t$. Each leg translates
+the whole page as a batch, so each model is loaded once per page. At most one
+directed model pair is resident in memory at a time. A direct model, when
+installed, always takes precedence.
+
+\subsection{Translucent re-rendering}\label{sec:render}
+Rendering works on \emph{blocks}. A block is a translated paragraph with its
+text $y$, its median line angle $\theta$ (the median, so that one skewed
+detection cannot tilt the block), an upright layout rectangle $T$ centred on
+the paragraph, and its source quadrilaterals $\{q_i\}$. Blocks with an empty
+translation are skipped, so the original text is left untouched where nothing
+replaces it. All highlights are drawn before any text, so no highlight can
+fade glyphs that have already been set.
+
+\paragraph{Highlight region}
+The highlight region is
+\begin{equation}
+  \Omega=\Bigl(\,\bigcup_i \mathcal{E}_{\gamma}(q_i)\Bigr)\cup
+         \mathcal{R}_{\theta}\bigl(\mathcal{E}_{\gamma}(T)\bigr),
+\end{equation}
+where $\mathcal{E}_\gamma$ scales a shape by $1+\gamma$ ($\gamma=0.06$) about
+its centre and $\mathcal{R}_\theta$ rotates about the centre of $T$. The union
+is computed geometrically \emph{before} filling. Filling overlapping shapes one
+by one would double the opacity where they overlap and leave dark bands
+between lines.
+
+\paragraph{Compositing}
+$\Omega$ is filled with the paper colour $\pi$ at opacity $\alpha$, using
+source-over compositing~\cite{porter1984compositing}. The edges are feathered
+with a Gaussian of radius $0.06\,h$ and the corners rounded with radius
+$0.18\,h$, where $h$ is the median line height:
+\begin{equation}
+  \hat I(p)=\alpha\,\pi+(1-\alpha)\,I(p),\qquad p\in\Omega .
+\end{equation}
+
+\begin{proposition}\label{prop:contrast}
+Let an original glyph pixel have colour $\kappa$ on paper $\pi$, and let page
+texture be modelled as a zero-mean perturbation $\delta$ of the paper colour.
+Inside $\Omega$, the ghost contrast is
+$|\hat\kappa-\hat\pi|=(1-\alpha)|\kappa-\pi|$ and the texture amplitude is
+$(1-\alpha)|\delta|$. Both are measured in the colour space in which the
+compositing is performed.
+\end{proposition}
+\begin{proof}
+$\hat\pi=\alpha\pi+(1-\alpha)\pi=\pi$ and
+$\hat\kappa=\alpha\pi+(1-\alpha)\kappa$, so
+$\hat\kappa-\hat\pi=(1-\alpha)(\kappa-\pi)$. Similarly,
+$\widehat{\pi+\delta}-\hat\pi=(1-\alpha)\delta$.
+\end{proof}
+With the default $\alpha=150/255\approx0.59$, the original glyphs and the
+texture both keep $\approx41\%$ of their amplitude. The texture is attenuated,
+not erased, and the patch artefact of opaque filling ($\alpha=1$) is avoided.
+Because the platform blends gamma-encoded sRGB values, the proposition holds
+for encoded values. Perceived contrast~\cite{wcag21} follows monotonically but
+not linearly.
+
+\paragraph{Halo}
+The remaining ghost could compete with the new glyphs. We therefore draw the
+laid-out translation twice: first stroked in $\pi$ with width
+$w_h=0.16\,s$ and round joins, then filled in $\kappa$. Within distance
+$w_h/2$ of every new glyph the ghost is fully covered, so the translated text
+has the full original contrast $|\kappa-\pi|$ against its immediate
+surroundings, whatever $\alpha$ is. Stroking changes no glyph advance, so the
+line breaks chosen during fitting still hold.
+
+\paragraph{Size fitting}
+Let $H(s)$ be the height of the paragraph laid out at font size $s$ and width
+$|T|_w$, with high-quality line breaking~\cite{knuth1981breaking}. With the
+anchor $p=0.82\,h$, we look for
+\begin{equation}
+  s^\star=\max\{s\in[0.45p,\;1.15p]:H(s)\le |T|_h\}
+\end{equation}
+by bisection to a tolerance of $\varepsilon=0.25$\,px, which takes
+$\lceil\log_2(0.7p/\varepsilon)\rceil$ layouts (seven for $p=24$\,px). $H$ is
+non-decreasing in $s$ except at occasional line-break discontinuities, so
+bisection always returns a \emph{feasible} size, though not necessarily the
+largest one. If $H(0.45p)>|T|_h$, the minimum size is used and the overflow is
+clipped and flagged. The canvas is rotated by $\theta$ about the centre of $T$,
+so line breaking operates in the upright frame.
+
+% ---------------------------------------------------------------------------
+\section{Implementation}\label{sec:impl}
+The system is an Android application (minimum API~24) written in Java. It has
+no native code of its own and requests no network permission. Inference uses
+the ONNX Runtime Java API with full graph optimisation and
+$\min(4,\text{cores}-1)$ intra-operator threads. OCR models are PaddleOCR
+releases converted with paddle2onnx at opset~14: the PP-OCRv4 detector,
+PP-OCRv4 recognisers for English and Chinese, PP-OCRv3 recognisers for Korean
+and Japanese, and the v2.0 orientation classifier. We also apply a graph
+repair that promotes rank-0 inputs of shape-assembling \texttt{Concat} nodes
+to rank~1; without it the runtime refuses to load the v4 recognisers. MT
+models are OPUS-MT checkpoints exported with Hugging Face Optimum and quantised
+to int8 dynamically, per channel. Each directed pair occupies about 35\,MB. The
+whole model tree is about 230\,MB.
+
+All inference is serialised on one background thread below normal priority,
+because the sessions are not thread-safe and the interface must stay
+responsive. Recognition sessions are cached per language, and one MT pair is
+resident at a time. PDF input is rasterised at 200\,dpi and processed one page
+at a time (an A4 page is about 23\,MB as ARGB), and output is written as PDF,
+DOCX or plain text. Fifty JVM unit tests cover the components whose failures
+are silent: Viterbi segmentation, CTC collapsing and dictionary indexing, DB
+post-processing, script identification, language-code handling and XML
+escaping.
+
+The engine implements all four languages in $\mathcal{L}$. The released user
+interface currently exposes English, Japanese and Chinese, controlled by a
+single build-time list; this does not affect the experiments below.
+
+% ---------------------------------------------------------------------------
+\section{Experimental Setup}\label{sec:setup}
+\note{This section is the protocol to execute. Record exact versions, seeds
+and device builds.}
+
+\paragraph{RQ1: Faithfulness of the library-free detection post-processing}
+Run the same PP-OCRv4 detector with (a) the reference PaddleOCR
+post-processing (OpenCV contours, pyclipper unclip, box-mean score) and (b)
+ours, on ICDAR~2015~\cite{karatzas2015icdar} (English) and the Chinese,
+Japanese and Korean subsets of MLT-2019~\cite{nayef2019mlt}. Report precision,
+recall and H-mean at IoU~$0.5$. Ablations: box-mean versus component-mean
+score, and polygon versus rectangle unclip. Stratify by text angle
+($<5^\circ$, $5$--$20^\circ$, $>20^\circ$) to test the rotation-bias
+hypothesis behind $S(C)$.
+
+\paragraph{RQ2: Recognition}
+Report word accuracy and 1$-$normalised edit distance on cropped words from the
+same datasets, with and without the orientation classifier.
+
+\paragraph{RQ3: Translation quality}
+Use FLORES-200 \emph{devtest}~\cite{nllb2022} for all 12 directions. Report
+BLEU via sacreBLEU~\cite{papineni2002bleu,post2018sacrebleu}, with tokenisers
+\texttt{13a} (en), \texttt{zh}, \texttt{ja-mecab} and \texttt{ko-mecab};
+chrF~\cite{popovic2015chrf}; and COMET~\cite{rei2020comet}. Compare fp32 and
+int8, and greedy decoding and beam~4. For the six pivoted directions, add
+NLLB-200-distilled-600M direct translation as an upper-bound reference that
+does not fit the device budget.
+
+\paragraph{RQ4: Efficiency}
+Use three devices in different price tiers \note{list SoC, RAM and Android
+version}. Measure median and 90th-percentile latency per stage (detection, post-processing,
+recognition, MT, rendering) over \note{N} pages at each quality level; peak
+PSS memory; cold-start model load time; and the measured decoder-cost ratio
+with and without a key-value cache.
+
+\paragraph{RQ5: Perceived rendering quality}
+Run a within-subjects user study with \note{N} participants on
+\note{M} images: flat documents, signs with light text on dark backgrounds, and
+text over photographs. Conditions:
+$\alpha\in\{255\ (\text{opaque erase}),200,150,90\}$ $\times$
+halo $\in\{\text{on},\text{off}\}$, plus a LaMa-inpainted
+reference~\cite{suvorov2022lama} computed off-device. Collect 5-point ratings
+of legibility and naturalness, and pairwise preferences. Analyse with
+mixed-effects models (participant and image as random effects). Objective
+companion metric: texture retention
+$\rho=\sigma_{\mathrm{out}}/\sigma_{\mathrm{in}}$ over non-glyph pixels in
+$\Omega$, compared with the prediction $1-\alpha$ from
+Proposition~\ref{prop:contrast}.
+
+% ---------------------------------------------------------------------------
+\section{Results}\label{sec:results}
+\note{Fill every table from measured data. Delete any row that is not measured.}
+
+\begin{table}[t]
+\centering
+\caption{Detection H-mean (\%) at IoU 0.5: reference versus library-free post-processing.}
+\label{tab:det}
+\begin{tabular}{lcccc}
+\toprule
+Post-processing & IC15 & MLT-zh & MLT-ja & MLT-ko\\
+\midrule
+Reference (OpenCV + pyclipper) & \tbd & \tbd & \tbd & \tbd\\
+Ours, box-mean score           & \tbd & \tbd & \tbd & \tbd\\
+Ours, component-mean score     & \tbd & \tbd & \tbd & \tbd\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Translation quality on FLORES-200 devtest (int8, greedy). $^\dagger$ = pivoted through English.}
+\label{tab:mt}
+\begin{tabular}{lccc}
+\toprule
+Direction & BLEU & chrF & COMET\\
+\midrule
+en$\to$ko / ko$\to$en & \tbd\,/\,\tbd & \tbd\,/\,\tbd & \tbd\,/\,\tbd\\
+en$\to$ja / ja$\to$en & \tbd\,/\,\tbd & \tbd\,/\,\tbd & \tbd\,/\,\tbd\\
+en$\to$zh / zh$\to$en & \tbd\,/\,\tbd & \tbd\,/\,\tbd & \tbd\,/\,\tbd\\
+ko$\to$ja$^\dagger$ / ja$\to$ko$^\dagger$ & \tbd\,/\,\tbd & \tbd\,/\,\tbd & \tbd\,/\,\tbd\\
+ko$\to$zh$^\dagger$ / zh$\to$ko$^\dagger$ & \tbd\,/\,\tbd & \tbd\,/\,\tbd & \tbd\,/\,\tbd\\
+ja$\to$zh$^\dagger$ / zh$\to$ja$^\dagger$ & \tbd\,/\,\tbd & \tbd\,/\,\tbd & \tbd\,/\,\tbd\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Median on-device latency (ms) per page, quality level HIGH (1280\,px).}
+\label{tab:lat}
+\begin{tabular}{lccc}
+\toprule
+Stage & Low tier & Mid tier & High tier\\
+\midrule
+Detection + post-proc. & \tbd & \tbd & \tbd\\
+Classification + recognition & \tbd & \tbd & \tbd\\
+Translation (direct) & \tbd & \tbd & \tbd\\
+Translation (pivoted) & \tbd & \tbd & \tbd\\
+Rendering & \tbd & \tbd & \tbd\\
+\midrule
+Peak PSS (MB) & \tbd & \tbd & \tbd\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{User study: mean ratings (1--5) and texture retention $\rho$.}
+\label{tab:user}
+\begin{tabular}{lcccc}
+\toprule
+Condition & Legibility & Naturalness & $\rho$ & $1-\alpha$\\
+\midrule
+$\alpha=255$ (opaque erase)  & \tbd & \tbd & \tbd & 0.00\\
+$\alpha=200$, halo           & \tbd & \tbd & \tbd & 0.22\\
+$\alpha=150$, halo (default) & \tbd & \tbd & \tbd & 0.41\\
+$\alpha=150$, no halo        & \tbd & \tbd & \tbd & 0.41\\
+$\alpha=90$, halo            & \tbd & \tbd & \tbd & 0.65\\
+LaMa inpainting (off-device) & \tbd & \tbd & \tbd & --\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\note{Add qualitative figure: original / opaque erase / highlight+halo /
+inpainting, over a flat page, a dark sign and a photograph.}
+
+% ---------------------------------------------------------------------------
+\section{Discussion and Limitations}
+\textbf{Rendering.} The translucent highlight trades completeness of removal
+for texture fidelity and zero extra model cost. Its main failure mode follows
+from Proposition~\ref{prop:contrast}: a high-contrast original behind a much
+shorter translation remains visible as a ghost outside the halo band. The
+typeface is not reproduced. A paragraph-level highlight also covers the empty
+tails of ragged-right lines.
+
+\textbf{Translation.} Pivoting doubles latency and compounds errors. Greedy,
+cache-free decoding is suited to short OCR segments but not to long documents.
+
+\textbf{Recognition.} Vertical CJK text is not typeset vertically. The script
+test cannot tell Kanji-only Japanese from Chinese.
+
+\textbf{Threats to validity.} Public benchmarks are scene-text-heavy. For
+document images, an in-house test set of photographed pages is needed
+\note{describe collection, consent and licence}.
+
+% ---------------------------------------------------------------------------
+\section{Conclusion}
+We presented a fully offline, dependency-light image translation system for
+Android. It combines exact, library-free DB post-processing, English-pivoted
+coverage of CJK directions, and a translucent re-rendering scheme whose effect
+on the original content is analytically bounded. \note{Conclude with the
+measured headline results.} Future work includes a key-value-cached decoder, a
+compact on-device text-erasing model to be combined with the halo renderer, and
+vertical CJK layout.
+
+% ---------------------------------------------------------------------------
+\section*{Data and Code Availability}
+\note{State repository URL or availability on request, model licences
+(PaddleOCR: Apache-2.0; OPUS-MT: CC-BY~4.0), and dataset licences.}
+
+\section*{Acknowledgment}
+\note{Funding and acknowledgements.}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

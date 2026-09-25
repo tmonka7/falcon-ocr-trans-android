@@ -4,7 +4,10 @@ Offline OCR and translation for Android. Point it at a photo, an image or a PDF;
 it finds the text, translates it, and paints the translation back over the page
 in place of the original, keeping the layout.
 
-Java, Gradle 8.13, no network permission. English, Korean, Japanese and Chinese.
+Java, Gradle 8.13, no network permission. English, Japanese and Chinese in the
+interface; Korean is implemented but hidden (see `Lang.USER_FACING`).
+
+Full technical documentation: [`docs/TECHNICAL.md`](docs/TECHNICAL.md).
 
 ## Status
 
@@ -40,9 +43,9 @@ tools/fetch_models.sh     # downloads and converts; needs python3
  │   translation   │   CJK↔CJK pivots through English (no direct model exists)
  └────────┬────────┘
           ▼
- ┌─────────────────┐   erase each box with its sampled paper colour,
- │ layout re-paint │   re-typeset at the fitted size in the sampled ink colour
- └─────────────────┘
+ ┌─────────────────┐   faint, soft-edged highlight in the sampled paper colour,
+ │ layout re-paint │   then re-typeset at the fitted size in the sampled ink
+ └─────────────────┘   colour, with a thin paper-coloured halo
 ```
 
 ### Package map
@@ -78,11 +81,18 @@ automatically.
 decoding is O(n²) in attention. The inputs are OCR lines and short paragraphs,
 where that stays cheap. It is the first thing to revisit for long documents.
 
+**Highlight, not erase.** Translated text has no solid background. Each block
+gets a faint, soft-edged highlight in its sampled paper colour (alpha 150/255
+by default, `LayoutRenderer.Options.highlightAlpha`), so the page texture shows
+through and the original survives as a ghost; a thin halo in the paper colour
+keeps the translation legible over it. Set `highlightAlpha = 255` for the old
+opaque erase.
+
 **Layout preservation has limits.** Position, block geometry, rotation, relative
-size, ink and paper colour all survive. Typeface does not — the system font is
-substituted. On flat backgrounds the result reads as reset text; over a
-photograph the erase step shows as a flat patch, which is the cost of not
-running an inpainting model.
+size, ink and paper colour and page texture all survive. Typeface does not — the
+system font is substituted. High-contrast originals can remain faintly visible
+around a short translation, which is the cost of not running an inpainting
+model.
 
 **`ja`, not `jp`.** `jp` is a country code. Model directories, preferences and
 history all use `ja`; `Lang.fromCode` still accepts `"jp"`.
@@ -101,10 +111,10 @@ Delivery](https://developer.android.com/guide/playcore/asset-delivery) pack. See
 ./gradlew test
 ```
 
-48 JVM tests covering the parts that fail silently rather than loudly: the
+50 JVM tests covering the parts that fail silently rather than loudly: the
 SentencePiece Viterbi segmentation, CTC collapsing and the dictionary index
-arithmetic, detection post-processing, script detection, language-code parsing,
-and the OOXML writer's escaping.
+arithmetic, detection post-processing, script detection, language-code parsing
+and Korean UI gating, and the OOXML writer's escaping.
 
 ## Licensing
 

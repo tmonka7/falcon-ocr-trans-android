@@ -83,6 +83,11 @@ public final class TranslationPipeline {
 
         if (!ocr.isEmpty() && options.autoDetectSource) {
             Lang guessed = ScriptDetector.detect(ocr.plainText(), source);
+            // The detector still recognises every implemented script, but a
+            // hidden language must not become the source behind the user's back.
+            if (!guessed.isUserFacing()) {
+                guessed = source;
+            }
             // Re-running recognition is expensive, so only do it when the guess
             // disagrees — the first pass read the page with the wrong head and
             // its output is not trustworthy enough to translate.

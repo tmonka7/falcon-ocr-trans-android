@@ -133,8 +133,8 @@ public final class SettingsActivity extends BaseActivity {
                 // Spell out which directions are chained, since that is the main
                 // thing a user would otherwise misread as the model being bad.
                 StringBuilder pivoted = new StringBuilder();
-                for (Lang from : Lang.values()) {
-                    for (Lang to : Lang.values()) {
+                for (Lang from : Lang.userFacing()) {
+                    for (Lang to : Lang.userFacing()) {
                         if (report.isPivoted(from, to)) {
                             pivoted.append("\n  ").append(Lang.pairKey(from, to));
                         }
@@ -180,7 +180,7 @@ public final class SettingsActivity extends BaseActivity {
                         + "• Hold the camera square to the page; heavy perspective "
                         + "reduces accuracy.\n"
                         + "• Raise Image Quality if small text is being missed.\n"
-                        + "• Korean, Japanese and Chinese translate to each other "
+                        + "• Japanese and Chinese translate to each other "
                         + "through English, which is slower and less accurate than any "
                         + "pair involving English directly.\n"
                         + "• The translation on the result screen is editable before "
